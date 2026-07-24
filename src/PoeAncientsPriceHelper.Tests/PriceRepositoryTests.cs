@@ -245,4 +245,120 @@ public class PriceRepositoryTests
         var handler = new FakeHttpMessageHandler(responseJson);
         return new HttpClient(handler);
     }
+
+    // ---- Currency Exchange helper: exchange snapshot (volume fields + category segregation) ----
+
+    // Real poe.ninja PoE2 shape incl. the volume fields (verified live 2026-07-24).
+    private const string FakeExchangeCurrencyResponse = """
+        {
+          "items": [
+            { "id": "divine",  "name": "Divine Orb" },
+            { "id": "exalted", "name": "Exalted Orb" },
+            { "id": "mystery", "name": "Mystery Item" }
+          ],
+          "lines": [
+            { "id": "divine",  "primaryValue": 1,
+              "volumePrimaryValue": 82025, "maxVolumeCurrency": "chaos", "maxVolumeRate": 0.1086 },
+            { "id": "exalted", "primaryValue": 0.002032,
+              "volumePrimaryValue": 7544, "maxVolumeCurrency": "divine", "maxVolumeRate": 492.2 },
+            { "id": "mystery", "primaryValue": null }
+          ],
+          "core": { "primary": "divine", "rates": { "exalted": 492.2, "chaos": 9.21 } }
+        }
+        """;
+
+    private const string FakeEssenceResponse = """
+        {
+          "items": [ { "id": "essence-of-the-body", "name": "Essence of the Body" } ],
+          "lines": [ { "id": "essence-of-the-body", "primaryValue": 0.02,
+                       "volumePrimaryValue": 12.5, "maxVolumeCurrency": "exalted", "maxVolumeRate": 9.8 } ],
+          "core": { "primary": "divine", "rates": { "exalted": 492.2 } }
+        }
+        """;
+
+    // Routes by the `type=` query param so remnant vs exchange-only categories return different items.
+    private sealed class RoutingFakeHandler(Func<string, string> jsonForUrl) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(jsonForUrl(request.RequestUri!.ToString()))
+            });
+    }
+
+    [Fact]
+    public async Task ExchangeSnapshot_CarriesVolumeFieldsAndPrimary()
+    {
+        using var http = FakeHttp(FakeExchangeCurrencyResponse);
+        using var dir = new TempDir();
+        var repo = new PriceRepository(http);
+        await repo.InitialFetchAsync(DefaultConfig(dir.Path));
+
+        var ex = repo.Exchange;
+        Assert.Equal("divine", ex.PrimaryCurrency);
+        var divine = ex.Items["divine orb"];
+        Assert.Equal("Divine Orb", divine.DisplayName);
+        Assert.Equal(1m, divine.PrimaryValue);
+        Assert.Equal(82025m, divine.VolumePrimaryValue);
+        Assert.Equal("chaos", divine.MaxVolumeCurrency);
+        Assert.Equal(0.1086m, divine.MaxVolumeRate);
+        Assert.True(divine.HasMarketData);
+    }
+
+    [Fact]
+    public async Task ExchangeSnapshot_NullPrimaryValue_KeepsItemWithoutMarketData()
+    {
+        using var http = FakeHttp(FakeExchangeCurrencyResponse);
+        using var dir = new TempDir();
+        var repo = new PriceRepository(http);
+        await repo.InitialFetchAsync(DefaultConfig(dir.Path));
+
+        var mystery = repo.Exchange.Items["mystery item"];
+        Assert.False(mystery.HasMarketData);
+        Assert.Null(mystery.VolumePrimaryValue);
+    }
+
+    [Fact]
+    public async Task ExchangeSnapshot_MissingVolumeFields_AreNull()
+    {
+        // FakeApiResponse (top of file) has no volume fields at all — they must parse as null.
+        using var http = FakeHttp(FakeApiResponse);
+        using var dir = new TempDir();
+        var repo = new PriceRepository(http);
+        await repo.InitialFetchAsync(DefaultConfig(dir.Path));
+
+        var flux = repo.Exchange.Items["chilling flux"];
+        Assert.Null(flux.VolumePrimaryValue);
+        Assert.Null(flux.MaxVolumeCurrency);
+        Assert.Null(flux.MaxVolumeRate);
+    }
+
+    // CLAUDE.md: extra exchange categories must NOT widen the remnant matching surface. An
+    // essence (exchange-only type) appears in the exchange view but never in the remnant Prices.
+    [Fact]
+    public async Task RemnantView_ExcludesExchangeOnlyCategories()
+    {
+        using var http = new HttpClient(new RoutingFakeHandler(url =>
+            url.Contains("type=Essences") ? FakeEssenceResponse : FakeExchangeCurrencyResponse));
+        using var dir = new TempDir();
+        var repo = new PriceRepository(http);
+        await repo.InitialFetchAsync(DefaultConfig(dir.Path));
+
+        Assert.True(repo.Exchange.Items.ContainsKey("essence of the body"));
+        Assert.False(repo.Prices.ContainsKey("essence of the body"));
+        Assert.True(repo.Prices.ContainsKey("divine orb"));   // remnant types still populate Prices
+    }
+
+    [Fact]
+    public async Task ExchangeSnapshot_KeysByLength_IndexesEveryKey()
+    {
+        using var http = FakeHttp(FakeExchangeCurrencyResponse);
+        using var dir = new TempDir();
+        var repo = new PriceRepository(http);
+        await repo.InitialFetchAsync(DefaultConfig(dir.Path));
+
+        var ex = repo.Exchange;
+        foreach (var key in ex.Items.Keys)
+            Assert.Contains(key, ex.KeysByLength[key.Length]);
+    }
 }

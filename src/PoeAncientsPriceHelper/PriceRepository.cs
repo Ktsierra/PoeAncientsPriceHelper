@@ -16,6 +16,31 @@ internal sealed record PriceSnapshot(
     IReadOnlyDictionary<string, PriceEntry> Prices,
     IReadOnlyDictionary<int, List<string>> KeysByLength);
 
+// One exchange-tradeable item for the Currency Exchange helper: the API's display name, its value in
+// the league's PRIMARY currency, and poe.ninja's volume fields (null when the API omits them).
+// Deliberately a separate record from PriceEntry so the remnant pipeline's shape — and its matching
+// surface — is untouched (CLAUDE.md).
+internal sealed record ExchangeEntry(
+    string DisplayName,
+    decimal PrimaryValue,
+    bool HasMarketData = true,
+    decimal? VolumePrimaryValue = null,
+    string? MaxVolumeCurrency = null,
+    decimal? MaxVolumeRate = null);
+
+// Atomic snapshot of the exchange view: every fetched category keyed by normalized name, the length
+// index for the fuzzy matcher, and the league's primary currency ("divine" | "exalted") for volume
+// display. Published as one reference so a reader never sees a torn pair of dict + index.
+internal sealed record ExchangeSnapshot(
+    IReadOnlyDictionary<string, ExchangeEntry> Items,
+    IReadOnlyDictionary<int, List<string>> KeysByLength,
+    string PrimaryCurrency)
+{
+    public static readonly ExchangeSnapshot Empty = new(
+        new ReadOnlyDictionary<string, ExchangeEntry>(new Dictionary<string, ExchangeEntry>()),
+        new Dictionary<int, List<string>>(), "divine");
+}
+
 internal sealed class PriceRepository : IDisposable
 {
     private readonly HttpClient _http;
@@ -23,6 +48,8 @@ internal sealed class PriceRepository : IDisposable
         new ReadOnlyDictionary<string, PriceEntry>(new Dictionary<string, PriceEntry>()),
         new Dictionary<int, List<string>>());
     private volatile PriceSnapshot _snapshot = Empty;
+    private volatile ExchangeSnapshot _exchange = ExchangeSnapshot.Empty;
+    public ExchangeSnapshot Exchange => _exchange;
     private System.Threading.Timer? _timer;
     // Cancelled on Dispose so a fetch in flight at shutdown (or one stuck behind the HttpClient
     // timeout) is abandoned cleanly instead of running on against a disposed client.
@@ -56,11 +83,18 @@ internal sealed class PriceRepository : IDisposable
     // whether any prices were ever loaded). Not raised on shutdown cancellation. Fires off the UI thread.
     public event Action? FetchFailed;
 
-    // Only the 5 exchange categories whose items actually appear as Verisium Remnant rewards.
-    // Other poe.ninja categories (Essences, SoulCores, Idols, Omens, Catalysts, etc.) belong to
-    // different game mechanics and never show up in the remnant panel — fetching them only wastes
-    // bandwidth and risks false fuzzy matches.
-    private static readonly string[] ExchangeTypes = ["Currency", "Runes", "Expedition", "Verisium", "UncutGems"];
+    // Only the 5 exchange categories whose items actually appear as Verisium Remnant rewards —
+    // the REMNANT matching surface; see ExchangeTypes for the picker helper's full list.
+    private static readonly string[] RemnantTypes = ["Currency", "Runes", "Expedition", "Verisium", "UncutGems"];
+
+    // Every poe.ninja PoE2 exchange category the in-game picker can trade, for the Currency Exchange
+    // helper. The remnant 5 come FIRST in their original order so the remnant dict's merge order (and
+    // thus any duplicate-key overwrites) is byte-identical to the old 5-type fetch. Enumerated against
+    // the live API 2026-07-24 ("Runes of Aldur"); picker tabs map by mechanic (Omens→Ritual,
+    // Catalysts→Breach, Distilled Emotions→Delirium). Re-verify when a new league adds a category.
+    private static readonly string[] ExchangeTypes =
+        ["Currency", "Runes", "Expedition", "Verisium", "UncutGems",
+         "Fragments", "Essences", "SoulCores", "Breach", "Delirium", "Ritual", "Idols", "Abyss"];
 
     public PriceRepository(HttpClient http) => _http = http;
 
@@ -101,12 +135,24 @@ internal sealed class PriceRepository : IDisposable
             // Fetch all exchange types concurrently (independent HTTP requests) instead of
             // sequentially — the round-trip latency dominates, so this cuts fetch time roughly
             // to a single request's.
-            var tasks = ExchangeTypes.Select(type => FetchTypeAsync(config.LeagueName, type, ct)).ToList();
+            var tasks = ExchangeTypes.Select(async type =>
+                (Type: type, Parsed: await FetchTypeAsync(config.LeagueName, type, ct))).ToList();
             var results = await Task.WhenAll(tasks);
+
             var dict = new Dictionary<string, PriceEntry>();
-            foreach (var entries in results)
-                foreach (var (name, entry) in entries)
-                    dict[name] = entry;
+            var exchangeDict = new Dictionary<string, ExchangeEntry>();
+            string primary = "divine";
+            foreach (var (type, parsed) in results)
+            {
+                // Remnant view: ONLY the original 5 types, in their original order — the remnant
+                // matching surface must stay byte-identical (CLAUDE.md).
+                if (RemnantTypes.Contains(type))
+                    foreach (var (name, entry) in parsed.Prices)
+                        dict[name] = entry;
+                foreach (var (name, entry) in parsed.Exchange)
+                    exchangeDict[name] = entry;
+                if (parsed.Exchange.Count > 0) primary = parsed.Primary;
+            }
             ApplyCustomOverride(dict, config.CustomPricesPath);
 
             // Every request came back empty (poe.ninja down/blocking, bad league, etc.). Keep the last
@@ -119,11 +165,13 @@ internal sealed class PriceRepository : IDisposable
             }
 
             var keysByLength = dict.Keys.GroupBy(k => k.Length).ToDictionary(g => g.Key, g => g.ToList());
-            // Publish both atomically in a single volatile write so the scan loop never sees
-            // a new Prices with a stale KeysByLength (or vice versa).
+            var exchangeKeys = exchangeDict.Keys.GroupBy(k => k.Length).ToDictionary(g => g.Key, g => g.ToList());
+            // Publish both snapshots atomically (single volatile write each) so a reader never sees a
+            // new Prices/Exchange paired with a stale index, or one snapshot updated without the other.
+            _exchange = new ExchangeSnapshot(
+                new ReadOnlyDictionary<string, ExchangeEntry>(exchangeDict), exchangeKeys, primary);
             _snapshot = new PriceSnapshot(
-                new ReadOnlyDictionary<string, PriceEntry>(dict),
-                keysByLength);
+                new ReadOnlyDictionary<string, PriceEntry>(dict), keysByLength);
             Interlocked.Increment(ref _priceGeneration);
             LastFetchedAt = DateTime.Now;
             PricesUpdated?.Invoke();
@@ -143,7 +191,7 @@ internal sealed class PriceRepository : IDisposable
         }
     }
 
-    private async Task<Dictionary<string, PriceEntry>> FetchTypeAsync(string league, string type, CancellationToken ct)
+    private async Task<ParsedType> FetchTypeAsync(string league, string type, CancellationToken ct)
     {
         var slug = league.Replace(" ", "").ToLowerInvariant();
         var typeSlug = type.ToLowerInvariant();
@@ -159,12 +207,19 @@ internal sealed class PriceRepository : IDisposable
         if (!resp.IsSuccessStatusCode)
         {
             Console.Error.WriteLine($"[PriceRepository] {type}: HTTP {(int)resp.StatusCode}");
-            return [];
+            return new ParsedType([], [], "divine");
         }
 
         var json = await resp.Content.ReadAsStringAsync(ct);
         return ParseResponse(json);
     }
+
+    // Everything one type's response yields: the remnant-style price dict (unchanged behaviour) plus
+    // the exchange entries with volume fields, and the league's primary currency for volume display.
+    private sealed record ParsedType(
+        Dictionary<string, PriceEntry> Prices,
+        Dictionary<string, ExchangeEntry> Exchange,
+        string Primary);
 
     // API shape (exchange/current/overview):
     //   items[]   → { id, name }             — display name lookup
@@ -174,9 +229,11 @@ internal sealed class PriceRepository : IDisposable
     // The primary currency differs by league: Softcore prices in divines, Hardcore prices in
     // exalted (divine is too valuable there). So derive both divine- and exalted-denominated
     // values from primaryValue via the rates, rather than assuming primaryValue is divines.
-    private static Dictionary<string, PriceEntry> ParseResponse(string json)
+    private static ParsedType ParseResponse(string json)
     {
         var result = new Dictionary<string, PriceEntry>();
+        var exchange = new Dictionary<string, ExchangeEntry>();
+        string primary = "divine";
         try
         {
             var obj = JObject.Parse(json);
@@ -194,12 +251,12 @@ internal sealed class PriceRepository : IDisposable
             // rates[x] = how many x equal 1 unit of the primary currency. When the primary IS
             // divine/exalted, its own rate is implicitly 1 (and absent from the rates object).
             var core = obj["core"];
-            var primary = core?["primary"]?.Value<string>() ?? "divine";
+            primary = core?["primary"]?.Value<string>() ?? "divine";
             var rates = core?["rates"];
             var divinePerPrimary = primary == "divine" ? 1m : rates?["divine"]?.Value<decimal>() ?? 0m;
             var exaltedPerPrimary = primary == "exalted" ? 1m : rates?["exalted"]?.Value<decimal>() ?? 1m;
 
-            if (obj["lines"] is not JArray lines) return result;
+            if (obj["lines"] is not JArray lines) return new ParsedType(result, exchange, primary);
             foreach (var line in lines)
             {
                 var id = line["id"]?.Value<string>();
@@ -213,19 +270,31 @@ internal sealed class PriceRepository : IDisposable
                 if (primaryValueToken is null || primaryValueToken.Type == JTokenType.Null)
                 {
                     result[key] = new PriceEntry(0m, 0m, HasMarketData: false);
+                    exchange[key] = new ExchangeEntry(name, 0m, HasMarketData: false);
                     continue;
                 }
                 var primaryValue = primaryValueToken.Value<decimal>();
                 var divineValue = primaryValue * divinePerPrimary;
                 var exaltedValue = Math.Round(primaryValue * exaltedPerPrimary, 1);
                 result[key] = new PriceEntry(divineValue, exaltedValue);
+
+                // Volume fields are optional in the API — null-tolerant reads keep older/partial
+                // responses working.
+                var volumeToken = line["volumePrimaryValue"];
+                decimal? volume = volumeToken is null || volumeToken.Type == JTokenType.Null
+                    ? null : volumeToken.Value<decimal>();
+                var maxVolRateToken = line["maxVolumeRate"];
+                decimal? maxVolRate = maxVolRateToken is null || maxVolRateToken.Type == JTokenType.Null
+                    ? null : maxVolRateToken.Value<decimal>();
+                exchange[key] = new ExchangeEntry(name, primaryValue, true,
+                    volume, line["maxVolumeCurrency"]?.Value<string>(), maxVolRate);
             }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"[PriceRepository] parse failed: {ex.Message}");
         }
-        return result;
+        return new ParsedType(result, exchange, primary);
     }
 
     private static void ApplyCustomOverride(Dictionary<string, PriceEntry> dict, string path)
