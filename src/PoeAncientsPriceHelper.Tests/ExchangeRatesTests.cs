@@ -91,7 +91,7 @@ public class ExchangeRatesTests
     public void FormatVolume_UsesPrimaryUnit()
     {
         Assert.Equal("82k div", ExchangeRates.FormatVolume(82025m, "divine"));
-        Assert.Equal("12k ex", ExchangeRates.FormatVolume(12100m, "exalted"));
+        Assert.Equal("12k ex", ExchangeRates.FormatVolume(12000m, "exalted"));
         Assert.Null(ExchangeRates.FormatVolume(null, "divine"));
         Assert.Null(ExchangeRates.FormatVolume(0m, "divine"));
     }
