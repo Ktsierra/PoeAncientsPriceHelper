@@ -124,4 +124,96 @@ public class ExchangeScreenDetectorTests
         Assert.True(ExchangeScreenDetector.Detect(lines, Resolve).IsNone);
         Assert.True(ExchangeScreenDetector.Detect([], Resolve).IsNone);
     }
+
+    // Modelled on the real "I Want" picker screenshot (2200×1100): big side header top-centre,
+    // category tab rail on the left, section headers between rows, 3 columns of icon+name cells.
+    private static List<OcrTextLine> PickerLines(string header = "I WANT") =>
+    [
+        Line(header, 1050, 25, 110, 28),
+        Line("All", 535, 95, 40, 20),                       // tab rail — never resolves
+        Line("Currency", 535, 148, 90, 20),
+        Line("Essences", 535, 415, 90, 20),
+        Line("CURRENCY", 1120, 88, 110, 18),                // section header — never resolves
+        Line("Scroll of Wisdom", 860, 135, 170, 22),
+        Line("Orb of", 1155, 125, 65, 20),                  // wrapped two-line name…
+        Line("Augmentation", 1155, 148, 130, 20),           // …resolves only concatenated
+        Line("Regal Orb", 860, 192, 100, 22),
+        Line("Exalted Orb", 1155, 192, 120, 22),
+        Line("Chaos Orb", 1440, 192, 105, 22),
+        Line("Divine Orb", 1440, 250, 110, 22),
+    ];
+
+    [Fact]
+    public void Detect_Picker_SideCellsAndOrder()
+    {
+        var det = ExchangeScreenDetector.Detect(PickerLines(), Resolve);
+        Assert.Null(det.Main);
+        Assert.NotNull(det.Picker);
+        Assert.Equal(ExchangeSide.Want, det.Picker!.Side);
+        // Sorted by Bounds.Top then Left: the merged two-line cell's union top (125) precedes
+        // "Scroll of Wisdom" (135).
+        Assert.Equal(
+            new[] { "orb of augmentation", "scroll of wisdom", "regal orb", "exalted orb", "chaos orb", "divine orb" },
+            det.Picker.Cells.Select(c => c.Key).ToArray());
+    }
+
+    [Fact]
+    public void Detect_Picker_HaveHeader()
+    {
+        var det = ExchangeScreenDetector.Detect(PickerLines("I HAVE"), Resolve);
+        Assert.Equal(ExchangeSide.Have, det.Picker!.Side);
+    }
+
+    // The merged cell's bounds must cover BOTH fragments so the badge anchors past the longer line.
+    [Fact]
+    public void Detect_Picker_WrappedNameBoundsAreUnion()
+    {
+        var det = ExchangeScreenDetector.Detect(PickerLines(), Resolve);
+        var merged = det.Picker!.Cells.Single(c => c.Key == "orb of augmentation");
+        Assert.Equal(Rectangle.Union(new Rectangle(1155, 125, 65, 20), new Rectangle(1155, 148, 130, 20)),
+            merged.Bounds);
+    }
+
+    // Chrome (tabs, section headers) must not appear as cells, and a picker needs ≥3 resolved cells.
+    [Fact]
+    public void Detect_Picker_ChromeExcluded_AndMinCells()
+    {
+        var det = ExchangeScreenDetector.Detect(PickerLines(), Resolve);
+        Assert.DoesNotContain(det.Picker!.Cells, c => c.Key.Contains("currency"));
+
+        List<OcrTextLine> sparse =
+        [
+            Line("I WANT", 1050, 25, 110, 28),
+            Line("Divine Orb", 1155, 192, 110, 22),
+            Line("Chaos Orb", 1440, 192, 105, 22),
+        ];
+        Assert.True(ExchangeScreenDetector.Detect(sparse, Resolve).IsNone);
+    }
+
+    // A frame with BOTH side labels but no title (main view whose title failed OCR) stays None —
+    // never misclassified as a picker.
+    [Fact]
+    public void Detect_BothLabelsWithoutTitle_IsNone()
+    {
+        List<OcrTextLine> lines =
+        [
+            Line("I WANT", 660, 228, 80, 20),
+            Line("I HAVE", 1370, 228, 80, 20),
+            Line("Orb of Chance", 680, 275, 150, 24),
+            Line("Vaal Orb", 1390, 275, 100, 24),
+            Line("Divine Orb", 700, 320, 130, 24),
+        ];
+        Assert.True(ExchangeScreenDetector.Detect(lines, Resolve).IsNone);
+    }
+
+    [Theory]
+    [InlineData(0, 0, 100, 20, 0, 22, 100, 20, true)]     // stacked, full overlap
+    [InlineData(0, 0, 60, 20, 5, 23, 120, 20, true)]      // stacked, partial overlap (wrapped name)
+    [InlineData(0, 0, 100, 20, 300, 22, 100, 20, false)]  // same rows, different column
+    [InlineData(0, 0, 100, 20, 0, 80, 100, 20, false)]    // too far apart vertically
+    public void AreWrappedPair_Geometry(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh, bool expected)
+    {
+        Assert.Equal(expected, ExchangeScreenDetector.AreWrappedPair(
+            new Rectangle(ax, ay, aw, ah), new Rectangle(bx, by, bw, bh)));
+    }
 }

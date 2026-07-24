@@ -107,7 +107,54 @@ internal static class ExchangeScreenDetector
     private static ExchangeDetection DetectPicker(IReadOnlyList<OcrTextLine> lines, ExchangeSide side,
         OcrTextLine header, Func<string, string?> resolve)
     {
-        return ExchangeDetection.None;   // Task 5
+        var below = lines.Where(l => l.Bounds.Top > header.Bounds.Bottom)
+                         .OrderBy(l => l.Bounds.Top).ToList();
+
+        var cells = new List<ExchangeCell>();
+        var unresolved = new List<OcrTextLine?>();
+        foreach (var line in below)
+        {
+            if (resolve(line.Text) is { } key) cells.Add(new ExchangeCell(key, line.Bounds));
+            else unresolved.Add(line);
+        }
+
+        // Long names wrap onto two lines inside a cell ("Orb of" / "Augmentation"). Merge vertically
+        // adjacent, horizontally overlapping fragments that resolve only as a concatenation. Tabs and
+        // section headers never resolve either way, so they fall out here for free.
+        for (int i = 0; i < unresolved.Count; i++)
+        {
+            if (unresolved[i] is not { } a) continue;
+            for (int j = i + 1; j < unresolved.Count; j++)
+            {
+                if (unresolved[j] is not { } b) continue;
+                if (!AreWrappedPair(a.Bounds, b.Bounds)) continue;
+                if (resolve(a.Text + " " + b.Text) is not { } key) continue;
+                cells.Add(new ExchangeCell(key, Rectangle.Union(a.Bounds, b.Bounds)));
+                unresolved[i] = null;
+                unresolved[j] = null;
+                break;
+            }
+        }
+
+        // Confirmation: a real picker always shows several known currencies; combat text or a stray
+        // header alone never resolves this many.
+        if (cells.Count < MinCellsToConfirm) return ExchangeDetection.None;
+
+        cells.Sort((x, y) => x.Bounds.Top != y.Bounds.Top
+            ? x.Bounds.Top.CompareTo(y.Bounds.Top)
+            : x.Bounds.Left.CompareTo(y.Bounds.Left));
+        var panel = Union(cells.Select(c => c.Bounds).Append(header.Bounds));
+        return new ExchangeDetection(null, new ExchangePickerView(side, cells, panel));
+    }
+
+    // b sits directly beneath a (small gap, tiny tolerance for OCR box overlap) with ≥50% horizontal
+    // overlap of the narrower fragment — the shape of a wrapped name inside one grid cell.
+    internal static bool AreWrappedPair(Rectangle a, Rectangle b)
+    {
+        if (b.Top < a.Bottom - 4) return false;
+        if (b.Top - a.Bottom > Math.Max(a.Height, b.Height)) return false;
+        int overlap = Math.Min(a.Right, b.Right) - Math.Max(a.Left, b.Left);
+        return overlap >= Math.Min(a.Width, b.Width) / 2;
     }
 
     private static bool MatchesAny(string text, string[] signatures)
