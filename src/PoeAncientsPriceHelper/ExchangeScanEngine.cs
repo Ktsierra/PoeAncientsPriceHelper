@@ -142,7 +142,18 @@ internal sealed class ExchangeScanEngine : IDisposable
                     lastGate = now;
                     var band = GateRegion(area);
                     var gateLines = CaptureLines(band, GateUpscale(band.Height));
-                    onExchange = gateLines.Any(l => ExchangeScreenDetector.IsAnySignature(l.Text));
+                    bool nowOnExchange = gateLines.Any(l => ExchangeScreenDetector.IsAnySignature(l.Text));
+                    if (!nowOnExchange && onExchange)
+                    {
+                        // Left the exchange between scans (sustain expired, gate no longer sees it):
+                        // drop the overlay and clear any dismiss latch, mirroring the rumour engine's
+                        // map-exit transition. Without this, at scan intervals ≥2s the 2-miss hide
+                        // path can't fire inside the sustain window and stale badges stay on screen.
+                        HideOverlay();
+                        _dismissed = false;
+                        missStreak = 0;
+                    }
+                    onExchange = nowOnExchange;
                 }
 
                 if (onExchange && (now - lastScan).TotalMilliseconds >= ClampInterval(_intervalMs()))
