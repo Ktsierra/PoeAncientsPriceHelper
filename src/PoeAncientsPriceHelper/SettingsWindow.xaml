@@ -68,6 +68,9 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="140"/>
@@ -175,6 +178,30 @@
                     FontSize="11" HorizontalAlignment="Left" Padding="10,4" Margin="0,8,0,0" Click="SetWorldRegionButton_Click"/>
             <TextBlock x:Name="WorldRegionLabel" Text="" Foreground="#888" FontSize="10"
                        Margin="0,4,0,0" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="13" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical" Margin="0,14,0,0">
+            <Border Height="1" Background="#2A2A2A" Margin="0,0,0,10"/>
+            <CheckBox x:Name="ExchangeEnabledBox" Foreground="#CCC" FontSize="12"
+                      Content="Enable Currency Exchange helper (experimental)"
+                      Checked="ExchangeEnabledBox_Changed" Unchecked="ExchangeEnabledBox_Changed"/>
+            <TextBlock Foreground="#888" FontSize="10" TextWrapping="Wrap" Margin="0,3,0,0"
+                       Text="Overlays poe.ninja ratios and trade volume on the exchange's currency picker once the opposite side is selected. Ratios are market aggregates from poe.ninja, not live order-book quotes."/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="14" Grid.Column="0" Text="Exchange scan rate:" Style="{StaticResource FieldLabel}" VerticalAlignment="Center"/>
+        <StackPanel Grid.Row="14" Grid.Column="1" Orientation="Vertical" Margin="0,4">
+            <ComboBox x:Name="ExchangeIntervalBox" MinWidth="160" HorizontalAlignment="Left"
+                      SelectionChanged="ExchangeIntervalBox_SelectionChanged"/>
+            <TextBlock Text="Only scans while the Currency Exchange is open." Foreground="#666" FontSize="10" Margin="0,2,0,0"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="15" Grid.Column="0" Text="Exchange ratio base:" Style="{StaticResource FieldLabel}" VerticalAlignment="Center"/>
+        <StackPanel Grid.Row="15" Grid.Column="1" Orientation="Vertical" Margin="0,4">
+            <ComboBox x:Name="ExchangeBaseBox" MinWidth="160" HorizontalAlignment="Left"
+                      SelectionChanged="ExchangeBaseBox_SelectionChanged"/>
+            <TextBlock Foreground="#666" FontSize="10" TextWrapping="Wrap" Margin="0,2,0,0"
+                       Text="Auto reads your I Want / I Have selection from the screen. Pick a fixed currency only if auto-detect fails on your setup."/>
         </StackPanel>
     </Grid>
     </ScrollViewer>

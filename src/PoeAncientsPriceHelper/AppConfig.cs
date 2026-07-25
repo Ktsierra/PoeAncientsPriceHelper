@@ -61,6 +61,17 @@ internal sealed class AppConfig
     public int RumourWorldWidth { get; set; }
     public int RumourWorldHeight { get; set; }
 
+    // Currency Exchange helper (3.8.0). Enabled by default; when off, the gate loop is fully idle
+    // (no gate OCR, no scans). Missing in older configs → these initializer defaults, exactly like
+    // AutoStart above.
+    public bool ExchangeHelperEnabled { get; set; } = true;
+    // Full-frame scan throttle while the exchange is on screen (ms). Clamped on use.
+    public int ExchangeScanIntervalMs { get; set; } = 900;
+    // Manual ratio-base override: a normalized exchange price key ("divine orb"), or "" for Auto
+    // (read the I Want / I Have pair off the screen). The CLAUDE.md-mandated escape hatch for
+    // setups where the main view's slot text won't OCR.
+    public string ExchangeManualBase { get; set; } = "";
+
     public Rectangle RegionRect
     {
         get => new(RegionX, RegionY, RegionWidth, RegionHeight);

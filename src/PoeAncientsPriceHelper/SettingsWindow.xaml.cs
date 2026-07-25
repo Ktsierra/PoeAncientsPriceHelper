@@ -16,14 +16,17 @@ public partial class SettingsWindow : Window
 {
     private readonly AppConfig _config;
     private readonly Func<Task<RumourRefreshResult>>? _refreshRumours;
+    private readonly Func<IReadOnlyList<(string Key, string Name)>>? _exchangeBaseChoices;
     private bool _loading;
 
     // internal: takes the internal AppConfig and is only ever constructed from MainWindow. The optional
     // callback performs a rumour-sheet refresh (owned by MainWindow, which holds the scanner).
-    internal SettingsWindow(AppConfig config, Func<Task<RumourRefreshResult>>? refreshRumours = null)
+    internal SettingsWindow(AppConfig config, Func<Task<RumourRefreshResult>>? refreshRumours = null,
+        Func<IReadOnlyList<(string Key, string Name)>>? exchangeBaseChoices = null)
     {
         _config = config;
         _refreshRumours = refreshRumours;
+        _exchangeBaseChoices = exchangeBaseChoices;
         InitializeComponent();
         Populate();
     }
@@ -77,6 +80,33 @@ public partial class SettingsWindow : Window
         // Atlas gate (#45): auto-detect on/off + the hand-drawn WORLD region for manual mode.
         RumourAutoWorldBox.IsChecked = _config.RumourWorldAutoDetect;
         UpdateWorldRegionUi();
+
+        // Currency Exchange helper (3.8.0): on/off, scan-rate presets, and the manual ratio base.
+        ExchangeEnabledBox.IsChecked = _config.ExchangeHelperEnabled;
+        ExchangeIntervalBox.Items.Clear();
+        ExchangeIntervalBox.Items.Add(new ComboBoxItem { Content = "Fast (0.6s)", Tag = 600 });
+        ExchangeIntervalBox.Items.Add(new ComboBoxItem { Content = "Normal (0.9s)", Tag = 900 });
+        ExchangeIntervalBox.Items.Add(new ComboBoxItem { Content = "Relaxed (2s)", Tag = 2000 });
+        var exItems = ExchangeIntervalBox.Items.Cast<ComboBoxItem>().ToList();
+        ExchangeIntervalBox.SelectedItem =
+            exItems.FirstOrDefault(i => (int)i.Tag! == _config.ExchangeScanIntervalMs)
+            ?? exItems.First(i => (int)i.Tag! == 900);
+
+        // "Auto" first, then every fetched exchange currency by display name. A saved key that isn't
+        // in the fetched list (league change, prices not loaded yet) still shows as a raw entry so
+        // the selection isn't silently lost.
+        ExchangeBaseBox.Items.Clear();
+        ExchangeBaseBox.Items.Add(new ComboBoxItem { Content = "Auto (read from screen)", Tag = "" });
+        foreach (var (key, name) in _exchangeBaseChoices?.Invoke() ?? [])
+            ExchangeBaseBox.Items.Add(new ComboBoxItem { Content = name, Tag = key });
+        var baseItems = ExchangeBaseBox.Items.Cast<ComboBoxItem>().ToList();
+        var savedBase = baseItems.FirstOrDefault(i => (string)i.Tag! == _config.ExchangeManualBase);
+        if (savedBase is null && _config.ExchangeManualBase.Length > 0)
+        {
+            savedBase = new ComboBoxItem { Content = _config.ExchangeManualBase, Tag = _config.ExchangeManualBase };
+            ExchangeBaseBox.Items.Add(savedBase);
+        }
+        ExchangeBaseBox.SelectedItem = savedBase ?? baseItems[0];
 
         _loading = false;
     }
@@ -225,6 +255,31 @@ public partial class SettingsWindow : Window
         {
             RefreshRumoursButton.IsEnabled = true;
         }
+    }
+
+    // The exchange engine reads config live each tick, so toggling on/off, the scan rate, or the
+    // manual base takes effect within a tick — no restart needed.
+    private void ExchangeEnabledBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        _config.ExchangeHelperEnabled = ExchangeEnabledBox.IsChecked == true;
+        ConfigStore.Save(_config);
+    }
+
+    private void ExchangeIntervalBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || ExchangeIntervalBox.SelectedItem is not ComboBoxItem { Tag: int ms }) return;
+        // ExchangeScanEngine.ClampInterval doesn't exist until Task 9; Task 9's wiring step swaps this
+        // to that shared clamp. Same bounds (300-5000ms) so behaviour is unchanged either way.
+        _config.ExchangeScanIntervalMs = Math.Clamp(ms, 300, 5000);
+        ConfigStore.Save(_config);
+    }
+
+    private void ExchangeBaseBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || ExchangeBaseBox.SelectedItem is not ComboBoxItem { Tag: string key }) return;
+        _config.ExchangeManualBase = key;
+        ConfigStore.Save(_config);
     }
 
     // ---- Hotkey rebinding (moved verbatim from MainWindow; one capture at a time) ----

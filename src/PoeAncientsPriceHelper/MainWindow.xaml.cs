@@ -251,7 +251,17 @@ public partial class MainWindow : Window
     // nothing needs syncing back here: theme is applied app-wide live, hotkey rebinds re-arm the hook,
     // and capture/auto-start are read straight from _config when next needed.
     private void SettingsButton_Click(object sender, RoutedEventArgs e) =>
-        new SettingsWindow(_config, RefreshRumourDataAsync) { Owner = this }.ShowDialog();
+        new SettingsWindow(_config, RefreshRumourDataAsync, ExchangeBaseChoices) { Owner = this }.ShowDialog();
+
+    // Choices for the Settings "Exchange ratio base" dropdown: every fetched exchange currency,
+    // alphabetical by display name. Empty until the first fetch completes — Settings shows just Auto.
+    private IReadOnlyList<(string Key, string Name)> ExchangeBaseChoices() =>
+        _repo is null
+            ? []
+            : _repo.Exchange.Items
+                .OrderBy(kv => kv.Value.DisplayName, StringComparer.OrdinalIgnoreCase)
+                .Select(kv => (kv.Key, kv.Value.DisplayName))
+                .ToList();
 
     // Opens the bundled HTML guide (docs\README.html, shipped next to the exe) in the default browser.
     // Falls back to the online README if the local copy is somehow missing.

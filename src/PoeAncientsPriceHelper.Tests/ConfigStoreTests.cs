@@ -78,6 +78,23 @@ public class ConfigStoreTests
         Assert.False(File.Exists(Path.Combine(dir.Path, "config.json.tmp")));
     }
 
+    // Currency Exchange helper keys (3.8.0): a config saved by an older version has none of them —
+    // they must come back as the defaults (helper on, 900ms, auto base), untouched otherwise.
+    [Fact]
+    public void Load_ConfigWithoutExchangeKeys_UsesDefaults()
+    {
+        using var dir = new TempDir();
+        File.WriteAllText(Path.Combine(dir.Path, "config.json"),
+            """{ "LeagueName": "Runes of Aldur", "RegionX": 10, "RegionY": 20, "RegionWidth": 300, "RegionHeight": 400 }""");
+
+        var config = ConfigStore.Load(dir.Path);
+
+        Assert.True(config.ExchangeHelperEnabled);
+        Assert.Equal(900, config.ExchangeScanIntervalMs);
+        Assert.Equal("", config.ExchangeManualBase);
+        Assert.Equal("Runes of Aldur", config.LeagueName);   // existing keys unaffected
+    }
+
     // Exercise the real ConfigStore (its path is injectable for exactly this reason) rather than
     // reimplementing the round-trip, so these tests cover the production load/save code.
     private static AppConfig LoadFrom(string dir) => ConfigStore.Load(dir);
