@@ -20,6 +20,9 @@ public partial class MainWindow : Window
     private RumourScanner? _rumourScanner;
     private IScreenCaptureBackend? _rumourCapture;
     private RumourScanEngine? _rumourEngine;
+    // Currency Exchange helper (3.8.0): dedicated capture backend + the gated auto-detect loop.
+    private IScreenCaptureBackend? _exchangeCapture;
+    private ExchangeScanEngine? _exchangeEngine;
     // 15s cap so a stalled poe.ninja/poecdn connection can't hang a whole fetch cycle for the
     // default 100s. Per-fetch cancellation (shutdown) is handled inside PriceRepository.
     // HTTP/2 + compression enabled for faster parallel fetches (5 concurrent requests multiplexed
@@ -76,6 +79,7 @@ public partial class MainWindow : Window
         }
         await StartupAsync();
         InitRumourHelper();
+        InitExchangeHelper();
         // Auto-start QoL: with a calibrated region and the option enabled, begin scanning and drop
         // straight to the tray, so the user just opens the app and it runs (saving the Start + minimize
         // clicks). Skipped under --debug (keep the window and console visible for troubleshooting) and
@@ -456,6 +460,26 @@ public partial class MainWindow : Window
         _rumourEngine.Start();
     }
 
+    // Creates the exchange helper and starts its gated loop. Idempotent; created once on load. The
+    // engine follows the live repository via the accessor, so a league change (which recreates
+    // _repo) needs no restart here. Language applies on next start, like the price engine.
+    private void InitExchangeHelper()
+    {
+        if (_exchangeEngine is not null) return;
+        _exchangeCapture = CreateCaptureBackend();
+        _exchangeEngine = new ExchangeScanEngine(
+            _exchangeCapture,
+            new OcrScanner(null, false, _config.GameLanguage),
+            () => _repo,
+            RumourScreen,
+            () => _config.ExchangeHelperEnabled,
+            () => _config.ExchangeScanIntervalMs,
+            () => _config.ExchangeManualBase,
+            () => _config.PauseWhenGameNotFocused,
+            _config.GameLanguage);
+        _exchangeEngine.Start();
+    }
+
     // The screen the rumour loop watches: the monitor PoE runs on (derived from the calibrated price
     // region when available), else the primary monitor.
     // The manual WORLD gate region (#45), or null to let the loop auto-detect it. Read live each gate
@@ -583,6 +607,9 @@ public partial class MainWindow : Window
         _engine?.Dispose();
         _rumourEngine?.Dispose();
         RumourOverlayManager.Close();
+        _exchangeEngine?.Dispose();
+        ExchangeOverlayManager.Close();
+        _exchangeCapture?.Dispose();
         _rumourCapture?.Dispose();
         _repo?.Dispose();
         _icons?.Dispose();

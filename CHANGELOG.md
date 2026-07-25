@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Currency Exchange helper.** Open the in-game Currency Exchange and select one side (I Want or
+  I Have); when you then browse the other side's currency list, each currency shows its market ratio
+  against your selection plus its recent trade volume, from poe.ninja. The regular exchange view also
+  gets a small "ninja" pill under Market Ratio comparing the live book against the broad market. The
+  numbers are market aggregates (refreshed every 30 min — the pill shows their age), not live
+  order-book quotes. On/off, scan rate, and a manual ratio-base fallback live in Settings. Note:
+  these overlay badges are invisible to screen-capture software (they're excluded from capture so
+  the helper's own screen reads stay clean).
+
 ## [3.7.1] — 2026-07-19
 
 ### Fixed

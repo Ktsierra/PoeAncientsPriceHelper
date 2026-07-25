@@ -97,6 +97,13 @@ public partial class App : System.Windows.Application
         RumourScanEngine.RequestDismiss();
     }
 
+    // ESC / Left-Ctrl+click also dismiss the exchange overlay: hide now, latch until that view is gone.
+    private static void DismissExchange()
+    {
+        ExchangeOverlayManager.HideNow();
+        ExchangeScanEngine.RequestDismiss();
+    }
+
     [DllImport("kernel32.dll")] private static extern bool AllocConsole();
     [DllImport("kernel32.dll")] private static extern bool AttachConsole(int dwProcessId);
 
@@ -141,7 +148,7 @@ public partial class App : System.Windows.Application
             if (mod != Modifiers.None) _mods |= mod;   // track modifier state even during a rebind capture
             if (_capturing) return;   // rebind in progress: swallow keys from their normal actions
             // ESC closes the in-game panel — hide the overlay the instant the key goes down.
-            if (code == KeyCode.VcEscape) { DismissOverlay(); DismissRumour(); }
+            if (code == KeyCode.VcEscape) { DismissOverlay(); DismissRumour(); DismissExchange(); }
         };
         _hook.KeyReleased += (_, ev) =>
         {
@@ -191,7 +198,7 @@ public partial class App : System.Windows.Application
     // apply — so normal play pays nothing. (#52)
     internal static void UpdateClickWatcher()
     {
-        bool wantWatch = ScanEngine.IsShowing || RumourScanEngine.IsShowing;
+        bool wantWatch = ScanEngine.IsShowing || RumourScanEngine.IsShowing || ExchangeScanEngine.IsShowing;
         lock (_clickGate)
         {
             if (wantWatch && _clickWatcher is null)
@@ -211,12 +218,12 @@ public partial class App : System.Windows.Application
 
     // Left-Ctrl + left click (the in-game "purchase" gesture) also dismisses the overlay. Edge-detected
     // off GetAsyncKeyState so we fire once per press, not every poll. Cheap enough to run at ~40 Hz while
-    // an overlay is up; DismissOverlay/DismissRumour no-op when nothing is showing.
+    // an overlay is up; DismissOverlay/DismissRumour/DismissExchange no-op when nothing is showing.
     private static void PollClick()
     {
         bool down = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
         bool ctrl = (GetAsyncKeyState(VK_LCONTROL) & 0x8000) != 0;
-        if (down && !_prevLButtonDown && ctrl) { DismissOverlay(); DismissRumour(); }
+        if (down && !_prevLButtonDown && ctrl) { DismissOverlay(); DismissRumour(); DismissExchange(); }
         _prevLButtonDown = down;
     }
 
