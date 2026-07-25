@@ -269,9 +269,7 @@ public partial class SettingsWindow : Window
     private void ExchangeIntervalBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_loading || ExchangeIntervalBox.SelectedItem is not ComboBoxItem { Tag: int ms }) return;
-        // ExchangeScanEngine.ClampInterval doesn't exist until Task 9; Task 9's wiring step swaps this
-        // to that shared clamp. Same bounds (300-5000ms) so behaviour is unchanged either way.
-        _config.ExchangeScanIntervalMs = Math.Clamp(ms, 300, 5000);
+        _config.ExchangeScanIntervalMs = ExchangeScanEngine.ClampInterval(ms);
         ConfigStore.Save(_config);
     }
 
