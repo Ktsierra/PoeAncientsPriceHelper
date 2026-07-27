@@ -123,6 +123,116 @@ ESC / Left-Ctrl+click dismiss latch. Next session, with PoE 2 open.
 
 ---
 
+## 2026-07-27 (later) — Windows
+
+First real testing session against the 3.8.0 branch. Tested **without PoE 2
+running**, using static screenshots of the exchange displayed on the primary
+monitor (with the game closed, the engine scans the full screen — see
+`ExchangeScanEngine.cs:123-132`). Manual ratio base set to `divine orb`.
+
+### Confirmed working — please don't "fix" these
+
+Verified end to end, so triage can skip them:
+
+- **Prices load.** `GET poe.ninja/poe2/api/economy/exchange/current/overview?league=Runes%20of%20Aldur&type=Currency`
+  → **HTTP 200, 53 items**. No `[PriceRepository] … HTTP <code>` lines in stderr
+  across any run, so every category fetch succeeded.
+- **OCR reads the panel.** `--ocr-test` on the picker screenshot returned **40
+  rows**, resolving `chaos orb`, `divine orb`, `regal orb`, `orb of chance`,
+  `artificer s orb`, `mirror of kalandra` and more — far above `MinCellsToConfirm`.
+- **Label matching is fine.** `NameNormalizer.Normalize("I WANT")` → `"i want"`,
+  an exact match. (Red herring for future triage: `--ocr-test` prints
+  `norm='want'` for that line, because the *price* pipeline reads the leading
+  `I` as a `1` multiplier. Different code path from the detector.)
+- **Capture exclusion works.** The `SetWindowDisplayAffinity failed` warning
+  never fired, and window enumeration shows the overlay window carrying
+  affinity `17` (`WDA_EXCLUDEFROMCAPTURE`).
+- **The overlay does render.** Enumerating the app's windows during a display
+  caught the excluded full-screen overlay flipping to `Visible=True`. Detection
+  → badge → render all work.
+
+### Findings
+
+- **W-4 — `ArgumentNullException: Value cannot be null. (Parameter 'encoder')`
+  in the scan loop.** Reproduces on every launch, **once**, at startup; not
+  again across ~50 subsequent gate ticks. Swallowed by the catch at
+  `ExchangeScanEngine.cs:219-222` and written to `Console.Error`, which is a
+  black hole in a WinExe — invisible without redirecting stderr. No `encoder`
+  string exists anywhere in the source, so it's thrown inside GDI+ (an
+  `Image.Save` overload receiving a null codec) on the capture→OCR conversion
+  path, most likely a cold-start race before something is initialised. Low user
+  impact (one scan pass lost) but it's a real unhandled path.
+
+- **W-5 — Picker detection is strongly scale-sensitive, and fails silently.**
+  This is the one that cost the most time. The full-frame pass runs at
+  `upscale: 1` (`CaptureLines(area)`, `ExchangeScanEngine.cs:172`), unlike the
+  gate which upscales 2× for small bands. A screenshot displayed at anything
+  other than roughly native game scale produces text the OCR won't resolve;
+  cells fall under `MinCellsToConfirm = 3`, `Detect` returns `None`, and the
+  overlay simply never appears — **no error, no hint, nothing distinguishable
+  from a broken build.** The tester only got badges after manually zooming to
+  approximately in-game text size. In-game this may never bite (native
+  resolution), but it makes screenshot-based testing a coin flip, and it would
+  bite any user on a non-standard UI scale. Consider an upscale on the
+  full-frame pass, or a visible "exchange detected but no cells resolved" state.
+
+- **W-6 — Badge geometry is per-cell, so pills come out non-uniform and
+  overlap.** Tester's description: *"showed in different sizes, covering other
+  currency, generally ugly — it should be uniform."* Confirmed misaligned,
+  overlapping/covering text, and inconsistent sizing. Root cause looks
+  mechanical:
+  - `ExchangeOverlay.cs:37` — *"Font per rounded pixel-height bucket, so pills
+    scale with the cell text across resolutions"* — the pill font/size is
+    derived from **each cell's own OCR text height**.
+  - `ExchangeScreenDetector.DetectPicker` merges wrapped names with
+    `Rectangle.Union(a.Bounds, b.Bounds)` (`ExchangeScreenDetector.cs:132`),
+    so any two-line cell ("Orb of Augmentation", "Blacksmith's Whetstone",
+    "Lesser Jeweller's Orb") has ~**double** the height of a one-line cell.
+  - Those cells therefore land in a much larger font bucket and get a much
+    larger pill, which spills into neighbouring cells.
+  - Anchoring is to the OCR **text** bounds, not the panel's uniform grid cell,
+    which also explains the misalignment.
+
+  Suggested direction: pick **one** font size for the whole picker (median or
+  modal single-line cell height, or derive it from the grid pitch), and anchor
+  pills to a computed uniform cell rect rather than per-line OCR bounds. Ratio
+  and volume strings vary in length too, so pill width should probably be
+  clamped to the cell.
+
+- **W-7 — The exchange path has no diagnostics at all.** `RumourDiag.cs` exists
+  for the rumour path; the exchange side has exactly two `Console.Error` lines
+  and nothing else. Every failure mode above (`None` detection, empty snapshot,
+  missing base key) hides the overlay **silently** — `ShowPickerBadges` calls
+  `HideOverlay()` and returns with no trace. From the user's chair, "no prices",
+  "wrong scale", "no remembered pair", and "crashed" are indistinguishable.
+  This is the single biggest blocker to Windows reporting useful bugs. An
+  `ExchangeDiag` mirroring `RumourDiag` (what the gate saw, cells resolved,
+  base key chosen, why it hid) would turn future rounds from guesswork into
+  data.
+
+- **W-8 — Two full-screen overlay windows, only one capture-excluded.**
+  Enumeration shows two `1920x1080` WinForms windows owned by the app: one with
+  display affinity `17` (excluded) and one with affinity `0` (**not** excluded).
+  Both were observed `Visible=True` at different moments. I don't know which
+  subsystem owns which, so this is an observation, not a claim — but if the
+  affinity-`0` window is ever used for exchange badges, they'd be captured and
+  fed back into the next OCR pass.
+
+### Re W-2 (from the earlier entry)
+
+Still not re-tested — the icon cache persisted from the 3.7.1 run, so 3.8.0
+never re-fetched. Say the word and I'll clear `%LocalAppData%` and relaunch.
+
+### UX note, not a bug
+
+An `I WANT` picker with no remembered `I Have` (and no manual base) correctly
+shows nothing — `ShowPickerBadges` needs a denominator. That is by design and
+the code is right. But it is completely silent, and it was the tester's first
+and most confusing dead end. A one-line hint ("select the other side first")
+would save every new user the same hour.
+
+---
+
 ## Closed
 
 _(nothing yet)_
