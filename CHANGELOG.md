@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.8.0] — 2026-07-27
+
 ### Added
 
 - **Currency Exchange helper.** Open the in-game Currency Exchange and select one side (I Want or

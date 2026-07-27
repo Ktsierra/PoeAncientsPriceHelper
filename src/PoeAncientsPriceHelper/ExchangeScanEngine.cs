@@ -232,7 +232,11 @@ internal sealed class ExchangeScanEngine : IDisposable
     // under the game's own "Market Ratio" header. Only when both sides are known and priced.
     private void ShowMainPill(ExchangeMainView main, ExchangeSnapshot snapshot, PriceRepository repo)
     {
-        if (main.WantKey is not { } wantKey || main.HaveKey is not { } haveKey ||
+        // Render from the CONFIRMED pair state (refreshed by ApplyMainView just before this call),
+        // not this frame's raw read: a single-frame OCR miss of one slot name must not blink the
+        // pill off — ExchangePairState holds the last confirmed pair through exactly that window.
+        // (During a 2-read change-confirm the pill briefly shows the still-confirmed previous pair.)
+        if (_pair.WantKey is not { } wantKey || _pair.HaveKey is not { } haveKey ||
             main.MarketRatioBounds is not { } anchor ||
             !snapshot.Items.TryGetValue(wantKey, out var want) ||
             !snapshot.Items.TryGetValue(haveKey, out var have))
