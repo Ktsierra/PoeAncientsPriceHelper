@@ -294,9 +294,23 @@ internal sealed class ExchangeScanEngine : IDisposable
         var badges = new List<ExchangeBadge>(picker.Cells.Count);
         foreach (var cell in picker.Cells)
         {
-            if (cell.Key == baseKey) continue;   // 1:1 against itself is noise
-            if (!snapshot.Items.TryGetValue(cell.Key, out var entry)) continue;
-            if (ExchangeRates.RatioFor(entry, baseEntry, baseKey, cellIsWant) is not { } ratio) continue;
+            // Per-cell trace: a single missing badge among many is invisible from outside, and
+            // "why did THAT one not price?" was the first question the fix for W-6 raised.
+            if (cell.Key == baseKey) { ExchangeDiag.Log($"  cell '{cell.Key}' skip: is the ratio base"); continue; }
+            if (!snapshot.Items.TryGetValue(cell.Key, out var entry))
+            {
+                ExchangeDiag.Log($"  cell '{cell.Key}' skip: no snapshot entry (resolved from OCR but " +
+                    "absent from every fetched poe.ninja category)");
+                continue;
+            }
+            if (ExchangeRates.RatioFor(entry, baseEntry, baseKey, cellIsWant) is not { } ratio)
+            {
+                ExchangeDiag.Log($"  cell '{cell.Key}' skip: no ratio vs '{baseKey}' " +
+                    $"(primary={entry.PrimaryValue} maxVolCur={entry.MaxVolumeCurrency ?? "-"} " +
+                    $"maxVolRate={entry.MaxVolumeRate?.ToString() ?? "-"})");
+                continue;
+            }
+            ExchangeDiag.Log($"  cell '{cell.Key}' -> {ratio}");
             badges.Add(new ExchangeBadge(ratio,
                 ExchangeRates.FormatVolume(entry.VolumePrimaryValue, snapshot.PrimaryCurrency),
                 cell.Bounds));
