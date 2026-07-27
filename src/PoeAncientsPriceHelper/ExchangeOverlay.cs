@@ -197,7 +197,13 @@ internal sealed class ExchangeOverlayForm : Form
         g.TranslateTransform(-Bounds.Left, -Bounds.Top);
         if (_pickerMode)
         {
-            foreach (var badge in _badges) PaintPill(g, badge);
+            // One font and one set of column boundaries for the whole panel — see ExchangeBadgeLayout
+            // for why per-cell sizing/anchoring produced mismatched pills that covered the next column.
+            var cells = new List<Rectangle>(_badges.Count);
+            foreach (var b in _badges) cells.Add(b.CellBounds);
+            var font = FontForPx(ExchangeBadgeLayout.UniformFontPx(cells));
+            var edges = ExchangeBadgeLayout.ColumnRightEdges(cells, _panelBounds);
+            foreach (var badge in _badges) PaintPill(g, badge, font, edges);
             PaintStalenessChip(g);
         }
         else if (_mainText is { } text)
@@ -211,22 +217,31 @@ internal sealed class ExchangeOverlayForm : Form
         }
     }
 
-    private void PaintPill(Graphics g, ExchangeBadge badge)
+    // Pills are right-aligned inside their own grid column, so every pill on the panel shares an x for
+    // its column and none can reach the next column's label. Vertically centred on the cell, which
+    // keeps wrapped two-line names centred across both lines without changing their pill size.
+    private void PaintPill(Graphics g, ExchangeBadge badge, Font font, IReadOnlyList<int> columnRightEdges)
     {
-        var font = FontFor(badge.CellBounds.Height);
-        string text = badge.Volume is { } v ? $"{badge.Ratio} · {v}" : badge.Ratio;
-        var size = g.MeasureString(text, font);
-        int x = badge.CellBounds.Right + PillGap;
-        int y = badge.CellBounds.Top + (badge.CellBounds.Height - (int)size.Height) / 2 - PillPadY;
-        // Near the right edge: drop the volume for a compact pill, then clamp.
-        if (x + size.Width + PillPadX * 2 > _screenBounds.Right - 4 && badge.Volume is not null)
+        int columnRight = ExchangeBadgeLayout.ColumnRightFor(badge.CellBounds, columnRightEdges, _panelBounds);
+        int limit = Math.Min(columnRight, _screenBounds.Right) - 4;
+
+        string? volume = badge.Volume;
+        var size = g.MeasureString(Compose(badge.Ratio, volume), font);
+        // Doesn't fit in the column: drop the volume tail before letting it spill.
+        if (columnRight - (size.Width + PillPadX * 2) < badge.CellBounds.Left && volume is not null)
         {
-            text = badge.Ratio;
-            size = g.MeasureString(text, font);
+            volume = null;
+            size = g.MeasureString(badge.Ratio, font);
         }
-        x = Math.Min(x, _screenBounds.Right - (int)size.Width - PillPadX * 2 - 4);
-        PaintTextPill(g, badge.Ratio, badge.Volume is { } vol && text != badge.Ratio ? vol : null, font, new Point(x, y));
+
+        int x = limit - (int)size.Width - PillPadX * 2;
+        x = Math.Max(x, _screenBounds.Left);
+        int y = badge.CellBounds.Top + (badge.CellBounds.Height - (int)size.Height) / 2 - PillPadY;
+        PaintTextPill(g, badge.Ratio, volume, font, new Point(x, y));
     }
+
+    private static string Compose(string ratio, string? volume) =>
+        volume is { } v ? $"{ratio} · {v}" : ratio;
 
     // A rounded pill with the ratio in gold and the optional " · volume" tail in grey.
     private void PaintTextPill(Graphics g, string ratio, string? volume, Font font, Point at)
@@ -277,10 +292,13 @@ internal sealed class ExchangeOverlayForm : Form
     }
 
     // Pill text tracks the cell height (cells shrink at lower resolutions / UI scales). Bucketed so
-    // we cache a handful of Font objects, not one per unique pixel height.
-    private Font FontFor(int cellHeightPx)
+    // we cache a handful of Font objects, not one per unique pixel height. The picker resolves ONE
+    // size for the whole panel (ExchangeBadgeLayout.UniformFontPx); the main-view pill still sizes off
+    // its own anchor, which is correct there — it's a single pill, not a grid.
+    private Font FontFor(int cellHeightPx) => FontForPx(ExchangeBadgeLayout.FontPxForHeight(cellHeightPx));
+
+    private Font FontForPx(int px)
     {
-        int px = Math.Clamp((int)(cellHeightPx * 0.62) / 2 * 2, 12, 22);
         if (_fonts.TryGetValue(px, out var f)) return f;
         f = new Font("Segoe UI", px, FontStyle.Bold, GraphicsUnit.Pixel);
         _fonts[px] = f;

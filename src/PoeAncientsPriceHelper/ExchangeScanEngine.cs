@@ -143,6 +143,11 @@ internal sealed class ExchangeScanEngine : IDisposable
                     var band = GateRegion(area);
                     var gateLines = CaptureLines(band, GateUpscale(band.Height));
                     bool nowOnExchange = gateLines.Any(l => ExchangeScreenDetector.IsAnySignature(l.Text));
+                    if (nowOnExchange && !onExchange)
+                        ExchangeDiag.Log($"gate HIT band={band} lines={gateLines.Count}");
+                    else if (!nowOnExchange)
+                        ExchangeDiag.Quiet($"gate miss band={band} lines={gateLines.Count} " +
+                            $"(no 'currency exchange' / 'i want' / 'i have' in the band)");
                     if (!nowOnExchange && onExchange)
                     {
                         // Left the exchange between scans (sustain expired, gate no longer sees it):
@@ -164,6 +169,8 @@ internal sealed class ExchangeScanEngine : IDisposable
                     if (repo is null || snapshot is null || snapshot.Items.Count == 0)
                     {
                         // No prices yet (startup / total outage): nothing to badge with.
+                        ExchangeDiag.Quiet($"hidden: no price snapshot (repo={(repo is null ? "null" : "ok")} " +
+                            $"items={snapshot?.Items.Count ?? 0}) — poe.ninja fetch not landed yet or failing");
                         HideOverlay();
                     }
                     else
@@ -171,6 +178,14 @@ internal sealed class ExchangeScanEngine : IDisposable
                         EnsureResolver(repo, snapshot);
                         var lines = CaptureLines(area);
                         var det = ExchangeScreenDetector.Detect(lines, _resolver!.Resolve);
+                        ExchangeDiag.Log($"scan area={area} ocrLines={lines.Count} -> " +
+                            (det.Main is { } m ? $"MAIN want={m.WantKey ?? "-"} have={m.HaveKey ?? "-"}"
+                             : det.Picker is { } p ? $"PICKER side={p.Side} cells={p.Cells.Count}"
+                             : "NONE"));
+                        if (det.IsNone && lines.Count > 0)
+                            ExchangeDiag.Quiet($"detect NONE with {lines.Count} OCR lines — either no " +
+                                "'i want'/'i have' header resolved, or fewer than 3 currency cells matched " +
+                                "(text too small for OCR at this scale?)");
 
                         if (!det.IsNone) lastHit = now;
 
@@ -219,6 +234,7 @@ internal sealed class ExchangeScanEngine : IDisposable
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"[ExchangeScanEngine] {ex.GetType().Name}: {ex.Message}");
+                ExchangeDiag.Log($"EXCEPTION {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}");
             }
 
             try { await Task.Delay(TickMs, ct); }
@@ -264,6 +280,12 @@ internal sealed class ExchangeScanEngine : IDisposable
         var baseKey = manual.Length > 0 ? manual : _pair.OppositeOf(picker.Side);
         if (baseKey is null || !snapshot.Items.TryGetValue(baseKey, out var baseEntry))
         {
+            // The single most confusing dead end for a new user: a picker with nothing to price
+            // against renders nothing at all, and looks identical to a broken build.
+            ExchangeDiag.Quiet(baseKey is null
+                ? $"hidden: no ratio base for the {picker.Side} picker — the opposite side isn't " +
+                  "remembered yet (open the main exchange view first, or set a manual base in Settings)"
+                : $"hidden: ratio base '{baseKey}' is not in the poe.ninja snapshot");
             HideOverlay();
             return;
         }
@@ -279,9 +301,18 @@ internal sealed class ExchangeScanEngine : IDisposable
                 ExchangeRates.FormatVolume(entry.VolumePrimaryValue, snapshot.PrimaryCurrency),
                 cell.Bounds));
         }
-        if (badges.Count == 0) { HideOverlay(); return; }
+        if (badges.Count == 0)
+        {
+            ExchangeDiag.Quiet($"hidden: {picker.Cells.Count} cells detected but 0 priceable against " +
+                $"'{baseKey}' (no snapshot entry, or no ratio computable)");
+            HideOverlay();
+            return;
+        }
 
         var (ageText, level) = Staleness(repo);
+        ExchangeDiag.Log($"SHOW picker side={picker.Side} base='{baseKey}' badges={badges.Count} " +
+            $"panel={picker.PanelBounds} age={ageText}");
+        ExchangeDiag.ClearQuiet();
         ExchangeOverlayManager.ShowPicker(badges, picker.PanelBounds, ageText, level);
         IsShowing = true;
     }
