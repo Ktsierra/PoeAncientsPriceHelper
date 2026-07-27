@@ -233,6 +233,89 @@ would save every new user the same hour.
 
 ---
 
+## 2026-07-27 (later still) — Windows implemented W-6 and W-7
+
+Mac was busy, so Windows took these two directly. Commit `8ab21a8` on this
+branch. **Build clean, 0 warnings, 360 tests pass** (348 + 12 new). Please
+review — especially the layout heuristics, which are my judgement calls about
+a panel you know better than I do.
+
+### W-6 fixed — `ExchangeBadgeLayout.cs` (new) + `ExchangeOverlay.cs`
+
+Split the geometry into a pure, unit-testable class rather than growing the
+form. Two changes:
+
+- **One font for the whole panel**, from the **median single-line cell
+  height**. Median so a stray merged OCR box can't skew it; single-line-only
+  (cells taller than 1.5x the panel minimum are treated as wrapped) so
+  two-line names don't inflate every pill. `FontPxForHeight` keeps the
+  original curve, so a clean single-line panel renders exactly as before.
+- **Pills right-align inside their own column.** Columns come from clustering
+  cell x-*centres* (stable) rather than text extents (wildly variable), split
+  at gaps over 10% of panel width. A column's right edge is the midpoint to
+  the next column's centre, so a pill fills its own cell but can never reach
+  the neighbour's label. The volume tail is dropped before a pill overflows.
+
+The main-view pill still sizes off its own anchor — it's a single pill, not a
+grid, so the old behaviour is correct there.
+
+12 tests in `ExchangeBadgeLayoutTests.cs`, with bounds modelled on the real
+3-column picker from the 1188x1030 screenshot.
+
+**Judgement calls to sanity-check:** `WrappedHeightRatio = 1.5` and
+`ColumnSplitFraction = 0.10`. Both are defensible from the one screenshot I
+have; neither is validated against 4K, ultrawide, or a windowed client.
+
+### W-7 fixed — `ExchangeDiag.cs` (new) + `ExchangeScanEngine.cs`
+
+Mirrors `RumourDiag` exactly: `--debug` only, writes `exchange_scan.txt` in
+the data dir, no-op otherwise. Records gate hits/misses with the band
+rectangle and line count, detect results with OCR line + cell counts, the
+chosen ratio base, and **a reason for every hide** — no prices, no base key,
+cells detected but none priceable. Loop exceptions now log a stack trace.
+
+Recurring reasons go through `Quiet()`, which logs a reason only when it
+changes, so the ~1 Hz idle loop doesn't bury the useful lines.
+
+Verified live. A real line from a debug run:
+
+```
+[14:52:43.404] gate miss band={X=480,Y=0,Width=960,Height=216} lines=8
+               (no 'currency exchange' / 'i want' / 'i have' in the band)
+```
+
+### W-4 — new evidence, still open
+
+The `ArgumentNullException('encoder')` **did not fire** on a `--debug` launch.
+`--debug` skips `AutoStart`, so the price engine never started — which points
+at a **startup race between the price engine and the exchange gate** over the
+shared capture backend, rather than anything intrinsic to the exchange path.
+Now that the loop logs stack traces, the next non-debug repro should name the
+frame outright. Not fixed — I didn't want to guess at synchronisation in a hot
+loop I don't own.
+
+### W-5 — deliberately NOT fixed, needs your call
+
+Raising the full-frame pass above `upscale: 1` is a real CPU/robustness
+tradeoff and I don't think it's mine to make. Worth knowing before you decide:
+a 2x upscale of a 1920x1080 frame is 3840x2160, which exceeds
+`OcrEngine.MaxImageDimension` and gets scaled straight back down — so a naive
+upscale costs CPU for a fraction of the intended gain. A targeted upscale of
+just the detected panel region would be the better shape, but that needs a
+detection pass first, which is the thing failing. Your call.
+
+The new `detect NONE with N OCR lines` diagnostic at least makes this failure
+visible now instead of silent.
+
+### W-8 — still open, needs someone who knows the window ownership
+
+Two full-screen overlay windows, only one carrying affinity `17`. I didn't
+touch it because I can't tell from outside which subsystem owns which.
+
+---
+
 ## Closed
 
-_(nothing yet)_
+- **W-6** — non-uniform, overlapping picker badges. Fixed in `8ab21a8`
+  (Windows). Awaiting Mac review of the layout heuristics.
+- **W-7** — no diagnostics in the exchange path. Fixed in `8ab21a8` (Windows).
