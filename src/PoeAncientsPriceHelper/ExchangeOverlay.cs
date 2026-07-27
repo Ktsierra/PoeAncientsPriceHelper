@@ -227,8 +227,11 @@ internal sealed class ExchangeOverlayForm : Form
 
         string? volume = badge.Volume;
         var size = g.MeasureString(Compose(badge.Ratio, volume), font);
-        // Doesn't fit in the column: drop the volume tail before letting it spill.
-        if (columnRight - (size.Width + PillPadX * 2) < badge.CellBounds.Left && volume is not null)
+        // Would the pill land on this cell's own NAME? Right-aligned in the column, a pill starts at
+        // (columnRight - width); if that is left of the name's right edge it sits on the text. Drop the
+        // volume tail first — a shorter pill is worth more than the volume number. (Measuring against
+        // the cell's LEFT edge, as this first did, only caught pills wider than the whole cell.)
+        if (columnRight - (size.Width + PillPadX * 2) < badge.CellBounds.Right + PillGap && volume is not null)
         {
             volume = null;
             size = g.MeasureString(badge.Ratio, font);
@@ -277,7 +280,9 @@ internal sealed class ExchangeOverlayForm : Form
             StalenessLevel.Stale => Color.FromArgb(224, 176, 96),
             _ => Color.FromArgb(160, 165, 175),
         };
-        string text = $"ninja {_ageText}";
+        // "ninja 12m" read as a brand plus a number and didn't say what the number meant. These are
+        // poe.ninja market aggregates from a periodic snapshot, not live order-book quotes — say so.
+        string text = $"snapshot {_ageText} old";
         var size = g.MeasureString(text, _chipFont);
         var rect = new Rectangle(_panelBounds.Right - (int)size.Width - PillPadX * 2,
             Math.Max(_screenBounds.Top, _panelBounds.Top - (int)size.Height - PillPadY * 2 - 4),

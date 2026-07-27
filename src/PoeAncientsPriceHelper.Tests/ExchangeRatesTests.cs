@@ -19,16 +19,19 @@ public class ExchangeRatesTests
     [Fact]
     public void RatioFor_DirectPairRate_CellIsWant()
     {
+        // The base side carries its name: "492 exalted : 1 divine". The cell's own name is beside the
+        // pill in the grid, so only the opposite side needs labelling.
         var s = ExchangeRates.RatioFor(Exalted, Divine, "divine orb", cellIsWant: true);
-        Assert.Equal("492 : 1", s);
+        Assert.Equal("492 : 1 div", s);
     }
 
-    // Same pair, browsing the "I Have" picker with Divine settled as "I Want": rate inverts.
+    // Same pair, browsing the "I Have" picker with Divine settled as "I Want": rate inverts, and the
+    // base moves to the LEFT side of the ratio, so its label follows it.
     [Fact]
     public void RatioFor_DirectPairRate_CellIsHave()
     {
         var s = ExchangeRates.RatioFor(Exalted, Divine, "divine orb", cellIsWant: false);
-        Assert.Equal("1 : 492", s);
+        Assert.Equal("1 div : 492", s);
     }
 
     // Opposite is NOT the cell's max-volume counter → derived from primary values.
@@ -37,7 +40,30 @@ public class ExchangeRatesTests
     public void RatioFor_DerivedFromPrimaryValues()
     {
         var s = ExchangeRates.RatioFor(Chaos, Exalted, "exalted orb", cellIsWant: true);
-        Assert.Equal("1 : 53", s);
+        Assert.Equal("1 : 53 ex", s);
+    }
+
+    // A base outside the three core currencies still labels, using its distinctive word — the base is
+    // whatever the player selected, never assumed to be Divine.
+    [Theory]
+    [InlineData("divine orb", "div")]
+    [InlineData("exalted orb", "ex")]
+    [InlineData("chaos orb", "chaos")]
+    [InlineData("mirror of kalandra", "mirror")]
+    [InlineData("orb of alchemy", "alchemy")]
+    [InlineData("regal orb", "regal")]
+    public void ShortName_AbbreviatesTheBase(string key, string expected)
+    {
+        Assert.Equal(expected, ExchangeRates.ShortName(key));
+    }
+
+    // Normalization the players actually use: the cheaper side is always the 1. A mirror never reads
+    // as "0.05 per divine" — it reads "1 mirror : 6k divine".
+    [Fact]
+    public void FormatRatioWithBase_KeepsTheCheaperSideAtOne()
+    {
+        Assert.Equal("1 : 6k div", ExchangeRates.FormatRatioWithBase(1m / 6000m, "divine orb", cellIsWant: true));
+        Assert.Equal("188 : 1 div", ExchangeRates.FormatRatioWithBase(188m, "divine orb", cellIsWant: true));
     }
 
     [Fact]

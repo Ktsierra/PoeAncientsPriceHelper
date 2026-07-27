@@ -39,7 +39,7 @@ internal static class ExchangeRates
             r = cellIsWant ? opposite.PrimaryValue / cell.PrimaryValue
                            : cell.PrimaryValue / opposite.PrimaryValue;
         }
-        return FormatRatio(r);
+        return FormatRatioWithBase(r, oppositeKey, cellIsWant);
     }
 
     // r = wants per 1 have → "N : 1" when wants are the cheap side, else "1 : N".
@@ -49,6 +49,48 @@ internal static class ExchangeRates
         return wantsPerHave >= 1m
             ? $"{FormatSide(wantsPerHave)} : 1"
             : $"1 : {FormatSide(1m / wantsPerHave)}";
+    }
+
+    // The ratio with the BASE side named — "188 : 1 div", "1 : 6k div".
+    //
+    // The bare ratio is correctly normalized (cheaper side always 1, so a mirror reads "1 : 6k" the way
+    // players actually quote it, never "0.05"), but it never said WHICH side was which. The cell's own
+    // name sits right beside the pill in the grid, so naming just the opposite side is enough to make it
+    // unambiguous, and it costs ~3 characters. The base is whatever the player has selected — never
+    // assumed to be Divine.
+    //
+    // Side placement follows RatioFor's "want : have" ordering: when the open picker is the WANT side the
+    // cell is on the left and the base on the right, and vice versa.
+    public static string? FormatRatioWithBase(decimal wantsPerHave, string baseKey, bool cellIsWant)
+    {
+        if (FormatRatio(wantsPerHave) is not { } ratio) return null;
+        var unit = ShortName(baseKey);
+        if (unit.Length == 0) return ratio;
+        int sep = ratio.IndexOf(" : ", StringComparison.Ordinal);
+        if (sep < 0) return ratio;
+        return cellIsWant
+            ? $"{ratio} {unit}"                                      // base is the right-hand side
+            : $"{ratio[..sep]} {unit}{ratio[sep..]}";                // base is the left-hand side
+    }
+
+    // Short display name for a currency key. The three core currencies get the abbreviations players
+    // actually use; anything else falls back to its distinctive word ("mirror of kalandra" → "mirror",
+    // "orb of alchemy" → "alchemy"), which reads better than a truncated full name.
+    internal static string ShortName(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key)) return "";
+        switch (key)
+        {
+            case "divine orb": return "div";
+            case "exalted orb": return "ex";
+            case "chaos orb": return "chaos";
+        }
+        var name = key;
+        if (name.StartsWith("orb of ", StringComparison.Ordinal)) name = name[7..];
+        else if (name.EndsWith(" orb", StringComparison.Ordinal)) name = name[..^4];
+        int of = name.IndexOf(" of ", StringComparison.Ordinal);
+        if (of > 0) name = name[..of];
+        return name;
     }
 
     // One side of a ratio, always ≥ 1: <10 keeps up to two decimals (trimmed, like the game's

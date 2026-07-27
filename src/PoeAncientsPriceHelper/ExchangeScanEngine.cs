@@ -21,6 +21,8 @@ internal sealed class ExchangeScanEngine : IDisposable
     private readonly Func<bool> _pauseWhenNotFocused;
     private readonly NameTranslator _translator;
     private readonly ExchangePairState _pair = new();
+    // Keeps picker cells from blinking as OCR reads the grid differently pass to pass (#W-6 follow-up).
+    private readonly ExchangePickerStabilizer _picker = new();
     // Serialises capture+OCR against the shared backend (mirrors RumourScanner's gate).
     private readonly object _gate = new();
     private CancellationTokenSource? _cts;
@@ -274,8 +276,14 @@ internal sealed class ExchangeScanEngine : IDisposable
 
     // Picker: one pill per resolved cell, against the opposite side's currency (manual override
     // wins). No base known → nothing shows: that IS the owner's show/don't-show state machine.
-    private void ShowPickerBadges(ExchangePickerView picker, ExchangeSnapshot snapshot, PriceRepository repo)
+    private void ShowPickerBadges(ExchangePickerView rawPicker, ExchangeSnapshot snapshot, PriceRepository repo)
     {
+        // Ride out single-pass OCR misses so a cell's badge doesn't blink off and back on.
+        var stable = _picker.Stabilize(rawPicker.Side, rawPicker.PanelBounds, rawPicker.Cells);
+        if (stable.Count != rawPicker.Cells.Count)
+            ExchangeDiag.Log($"  stabilizer: {rawPicker.Cells.Count} read -> {stable.Count} shown " +
+                "(re-emitting cells missed this pass)");
+        var picker = rawPicker with { Cells = stable };
         var manual = _manualBaseKey();
         var baseKey = manual.Length > 0 ? manual : _pair.OppositeOf(picker.Side);
         if (baseKey is null || !snapshot.Items.TryGetValue(baseKey, out var baseEntry))
@@ -383,6 +391,9 @@ internal sealed class ExchangeScanEngine : IDisposable
 
     private void HideOverlay()
     {
+        // The picker is gone (or unusable) — drop remembered cells so a later panel never inherits
+        // badges anchored to the previous one's geometry.
+        _picker.Reset();
         if (_showing) { ExchangeOverlayManager.HideNow(); IsShowing = false; }
     }
 
