@@ -314,8 +314,117 @@ touch it because I can't tell from outside which subsystem owns which.
 
 ---
 
+## 2026-07-27 (session 2) — Windows UX round
+
+Tester confirmed the picker now works and pill sizes are consistent. Remaining
+feedback drove this round. Commits `ae6fd6e`, `22be2f8`. **376 tests pass**,
+build clean.
+
+### W-9 fixed — badges blinked on and off
+
+Reported as *"it shows sometimes... off, then on for a few seconds"*. A cell
+that resolved on one pass and got clipped on the next lost its badge, over a
+completely static grid.
+
+New `ExchangePickerStabilizer` — the exchange analogue of `RumourStabilizer`,
+which already exists for exactly this reason on the rumour side. Keyed by cell
+**position** rather than row index, because the picker is a spatial grid, not a
+short ordered list (same reasoning as the price overlay's `RowSlot`). A cell
+missed for up to 3 passes (~2.7 s at the 900 ms default) keeps its badge;
+beyond that it's dropped. Switching side, moving the panel, or hiding the
+overlay all reset it, so badges can never outlive their panel. 9 tests.
+
+### W-10 fixed — the ratio never said which side was which
+
+Reported: *"1:188 1.4k div ... not very intuitive"*.
+
+Important correction from the tester, worth recording because it shaped the
+fix: **the base is whatever the player selects, not always Divine**, and
+players quote the cheap side as 1 — "6k div per mirror", never "1 exalt is
+0.02 div". The existing `FormatRatio` **already did this correctly** and is
+unchanged. What was missing was naming the sides.
+
+The base side now labels itself, and only the base — the cell's own name is
+already beside the pill in the grid:
+
+```
+Exalted Orb          [ 188 : 1 div ]
+Mirror of Kalandra   [ 1 : 6k div ]
+```
+
+The label follows the base across the separator when the open picker is the
+*I Have* side (`RatioFor` orders as want : have). Core currencies use the
+abbreviations players use (`div`/`ex`/`chaos`); anything else falls back to its
+distinctive word (`mirror of kalandra` → `mirror`).
+
+**Mac: this changed three of your `ExchangeRatesTests` expectations**
+(`"492 : 1"` → `"492 : 1 div"` etc). Intended behaviour change, not a
+regression — but it's your assertion I rewrote, so flagging it explicitly.
+
+### W-11 fixed — staleness chip wording
+
+`ninja 12m` read as a brand plus an unexplained number. Now **`snapshot 12m
+old`**, which says what the number measures. Tester's suggestion.
+
+### W-12 fixed — my own overlap bug from the previous round
+
+The volume-drop check compared the pill against the cell's **left** edge, so it
+only fired for pills wider than an entire cell — pills still landed on their
+own cell's name. Now measured against the name's **right** edge, which is the
+thing actually being overlapped.
+
+### Per-cell diagnostics added
+
+Every picker cell now logs either its ratio or exactly why it was skipped
+(is the base / no snapshot entry / no computable ratio, with primary value and
+max-volume pair dumped). Added while chasing a reported case where Exalted Orb
+showed no badge against a divine base — poe.ninja carries full data for it
+(`primaryValue 0.002268, maxVolumeCurrency "divine", maxVolumeRate 440.9`), so
+the drop was upstream of the maths. With the stabilizer in, that specific
+symptom looks like it was the blinking, but the trace stays.
+
+### Still open: why only at 80% zoom?
+
+Tester found the picker only detects with the screenshot at ~80% zoom. This is
+**W-5** — the full-frame pass runs at `upscale: 1`, so OCR only resolves text
+already near native game size, and 80% happened to land there for a
+1188x1030 screenshot on a 1920x1080 monitor. Expected to be a non-issue at
+native resolution in-game; to be confirmed against the real client.
+
+---
+
+## Might do — configurable exchange scan region
+
+Raised by the tester: *"would it be better if we did the same thing remnants do
+where we select the area to scan?"* Worth recording because the answer is yes,
+and the exchange is the odd one out in this app:
+
+| Path | How it finds its scan area |
+|---|---|
+| Price / remnants | Fully calibrated `RegionRect`, set by the user (F4) |
+| Rumours (Atlas) | Computed default **with a user override** — `overrideRegion ?? WorldGateRegion(gateArea)` (`RumourScanEngine.cs:127`), backed by `RumourWorldAutoDetect` + `RumourWorldRect` |
+| **Exchange** | **Hardcoded** — top 20% x middle 50%, no override, no calibration |
+
+The rumour path is the precedent to copy: auto-detect by default, manual
+override when auto-detect fails on a given setup. Would need
+`ExchangeGateAutoDetect` + `ExchangeGateRect` config keys, a Settings section,
+and wiring into `GateRegion`.
+
+**Deliberately not built yet.** It's only worth doing once, tuned against the
+real client — the current evidence is all from screenshots, and a region tuned
+to those could be wrong for the game. Revisit if in-game testing shows the
+hardcoded band missing the header.
+
+---
+
 ## Closed
 
-- **W-6** — non-uniform, overlapping picker badges. Fixed in `8ab21a8`
-  (Windows). Awaiting Mac review of the layout heuristics.
-- **W-7** — no diagnostics in the exchange path. Fixed in `8ab21a8` (Windows).
+- **W-6** — non-uniform, overlapping picker badges. Fixed in `8ab21a8`, overlap
+  check corrected in `22be2f8` (Windows). Awaiting Mac review of the layout
+  heuristics.
+- **W-7** — no diagnostics in the exchange path. Fixed in `8ab21a8`, per-cell
+  tracing added in `ae6fd6e` (Windows).
+- **W-9** — blinking badges. Fixed in `22be2f8` (Windows).
+- **W-10** — unlabelled ratio sides. Fixed in `22be2f8` (Windows).
+- **W-11** — staleness chip wording. Fixed in `22be2f8` (Windows).
+- **W-12** — pill overlapping its own cell's name. Fixed in `22be2f8` (Windows).
