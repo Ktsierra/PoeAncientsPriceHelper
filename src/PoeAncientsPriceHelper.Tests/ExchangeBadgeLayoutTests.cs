@@ -74,64 +74,116 @@ public class ExchangeBadgeLayoutTests
     }
 
     [Fact]
-    public void ColumnRightEdges_FindsThreeColumns()
+    public void Columns_FindsThreeColumns()
     {
-        var edges = ExchangeBadgeLayout.ColumnRightEdges(MixedPanel(), Panel);
-        Assert.Equal(3, edges.Count);
+        var columns = ExchangeBadgeLayout.Columns(MixedPanel(), Panel);
+        Assert.Equal(3, columns.Lefts.Count);
+        Assert.Equal(3, columns.Rights.Count);
     }
 
     [Fact]
-    public void ColumnRightEdges_LastColumnReachesThePanelEdge()
+    public void Columns_AreOrderedAndSeparated()
     {
-        var edges = ExchangeBadgeLayout.ColumnRightEdges(MixedPanel(), Panel);
-        Assert.Equal(Panel.Right, edges[^1]);
+        var columns = ExchangeBadgeLayout.Columns(MixedPanel(), Panel);
+        for (int i = 1; i < columns.Rights.Count; i++)
+            Assert.True(columns.Rights[i] > columns.Rights[i - 1], "column edges must increase left to right");
     }
 
     [Fact]
-    public void ColumnRightEdges_AreOrderedAndSeparated()
+    public void RightFor_KeepsAPillOutOfTheNextColumn()
     {
-        var edges = ExchangeBadgeLayout.ColumnRightEdges(MixedPanel(), Panel);
-        for (int i = 1; i < edges.Count; i++)
-            Assert.True(edges[i] > edges[i - 1], "column edges must increase left to right");
-    }
-
-    [Fact]
-    public void ColumnRightFor_KeepsAPillOutOfTheNextColumn()
-    {
-        // The reported bug: a long name's pill landed on the next column's label. The boundary for a
-        // left-column cell must sit left of the middle column's leftmost text.
-        var cells = MixedPanel();
-        var edges = ExchangeBadgeLayout.ColumnRightEdges(cells, Panel);
+        // A long name's pill must not land on the next column's label.
+        var columns = ExchangeBadgeLayout.Columns(MixedPanel(), Panel);
         var longLeftCell = Cell(345, 300, 190, 45);          // Lesser Jeweller's Orb
-        int boundary = ExchangeBadgeLayout.ColumnRightFor(longLeftCell, edges, Panel);
+        int boundary = ExchangeBadgeLayout.RightFor(longLeftCell, columns, Panel);
         int middleColumnLeftmostText = 645;
-        Assert.True(boundary <= middleColumnLeftmostText,
+        Assert.True(boundary < middleColumnLeftmostText,
             $"left-column boundary {boundary} must not reach middle-column text at {middleColumnLeftmostText}");
     }
 
     [Fact]
-    public void ColumnRightFor_AllCellsInAColumnShareOneBoundary()
+    public void RightFor_AllCellsInAColumnShareOneBoundary()
     {
         // Uniformity: every pill in a column right-aligns to the same x, whatever the name length.
-        var cells = MixedPanel();
-        var edges = ExchangeBadgeLayout.ColumnRightEdges(cells, Panel);
-        int shortName = ExchangeBadgeLayout.ColumnRightFor(Cell(645, 125, 110, 22), edges, Panel);
-        int longName = ExchangeBadgeLayout.ColumnRightFor(Cell(645, 240, 165, 22), edges, Panel);
+        var columns = ExchangeBadgeLayout.Columns(MixedPanel(), Panel);
+        int shortName = ExchangeBadgeLayout.RightFor(Cell(645, 125, 110, 22), columns, Panel);
+        int longName = ExchangeBadgeLayout.RightFor(Cell(645, 240, 165, 22), columns, Panel);
         Assert.Equal(shortName, longName);
     }
 
+    // The in-game regression: the boundary used to be derived from x-CENTRES, so it moved whenever a
+    // different mix of name lengths resolved. Reading the same grid with wider text must not shift a
+    // single pill.
     [Fact]
-    public void ColumnRightFor_SingleColumnPanelUsesPanelEdge()
+    public void Columns_DoNotMoveWhenNameLengthsChange()
     {
-        var single = new List<Rectangle> { Cell(645, 125, 110, 22), Cell(645, 180, 130, 22) };
-        var edges = ExchangeBadgeLayout.ColumnRightEdges(single, Panel);
-        Assert.Single(edges);
-        Assert.Equal(Panel.Right, ExchangeBadgeLayout.ColumnRightFor(single[0], edges, Panel));
+        var narrow = new List<Rectangle>
+        {
+            Cell(345, 125, 90, 22), Cell(645, 125, 90, 22), Cell(940, 125, 90, 22),
+        };
+        var wide = new List<Rectangle>
+        {
+            Cell(345, 125, 260, 22), Cell(645, 125, 250, 22), Cell(940, 125, 240, 22),
+        };
+
+        var a = ExchangeBadgeLayout.Columns(narrow, Panel);
+        var b = ExchangeBadgeLayout.Columns(wide, Panel);
+
+        Assert.Equal(a.Rights, b.Rights);
+    }
+
+    // Wrapped two-line cells are unioned by the detector, and the tier numeral ("II"/"III") on the
+    // second line starts left of the name — dragging the union's Left out. Nearest-column matching
+    // must still place it in its own column, not the one before.
+    [Fact]
+    public void RightFor_WrappedCellDraggedLeftStaysInItsOwnColumn()
+    {
+        var columns = ExchangeBadgeLayout.Columns(MixedPanel(), Panel);
+        int normal = ExchangeBadgeLayout.RightFor(Cell(645, 125, 110, 22), columns, Panel);
+        var draggedLeft = Cell(645 - 18, 235, 210, 45);   // "Greater Orb of / II Augmentation"
+        Assert.Equal(normal, ExchangeBadgeLayout.RightFor(draggedLeft, columns, Panel));
+    }
+
+    // The last column used to stretch to panel.Right, which is the union of the cells' TEXT bounds —
+    // i.e. wherever the widest name on the panel happened to end. That tied the right column's pills
+    // to name lengths the same way the centre-based split did. It should simply be one pitch wide,
+    // like every other column. (It may legitimately sit past panel.Right: the game's cell extends
+    // beyond its label, and PaintPill clamps to the screen.)
+    [Fact]
+    public void Columns_LastColumnIsOnePitchWideLikeTheOthers()
+    {
+        var columns = ExchangeBadgeLayout.Columns(MixedPanel(), Panel);
+        int lastWidth = columns.Rights[^1] - columns.Lefts[^1];
+        int firstWidth = columns.Rights[0] - columns.Lefts[0];
+        Assert.InRange(lastWidth, firstWidth - 4, firstWidth + 4);
+    }
+
+    // ...and it must not depend on the widest name, which is what the old panel.Right did.
+    [Fact]
+    public void Columns_LastColumnIgnoresTheWidestName()
+    {
+        var cells = MixedPanel();
+        var withWideTail = new List<Rectangle>(cells) { Cell(940, 400, 240, 22) };
+        Assert.Equal(
+            ExchangeBadgeLayout.Columns(cells, Panel).Rights[^1],
+            ExchangeBadgeLayout.Columns(withWideTail, Panel).Rights[^1]);
     }
 
     [Fact]
-    public void ColumnRightEdges_EmptyIsSafe()
+    public void RightFor_SingleColumnPanelUsesPanelEdge()
     {
-        Assert.Empty(ExchangeBadgeLayout.ColumnRightEdges([], Panel));
+        var single = new List<Rectangle> { Cell(645, 125, 110, 22), Cell(645, 180, 130, 22) };
+        var columns = ExchangeBadgeLayout.Columns(single, Panel);
+        Assert.Single(columns.Lefts);
+        Assert.True(ExchangeBadgeLayout.RightFor(single[0], columns, Panel) <= Panel.Right);
+    }
+
+    [Fact]
+    public void Columns_EmptyIsSafe()
+    {
+        var columns = ExchangeBadgeLayout.Columns([], Panel);
+        Assert.Empty(columns.Lefts);
+        Assert.Empty(columns.Rights);
+        Assert.Equal(Panel.Right, ExchangeBadgeLayout.RightFor(Cell(1, 1, 1, 1), columns, Panel));
     }
 }

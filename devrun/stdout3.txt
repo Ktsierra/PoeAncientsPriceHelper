@@ -1,0 +1,49 @@
+[Debug] PoeAncientsPriceHelper starting
+[19:51:36.065] START prices=286 icons=True region={X=5,Y=30,Width=844,Height=1045}
+[overlay] region={X=5,Y=30,Width=844,Height=1045} screen={X=0,Y=0,Width=2560,Height=1440} bounds={X=0,Y=0,Width=2560,Height=1440} dpiForWindow=96
+[19:51:36.149] overlay ready
+[19:51:36.479] panel OPEN brightness=143 avgPixel=#889392
+[19:51:36.752] OCR 9 rows → raw='YouTube' y=41 MISS | raw='dore - pc' y=168 MISS | raw='dore - p,' y=250 MISS | raw='eVlewN' y=537 MISS | raw='2.ninja' y=621 MISS | raw='Ira Drop' y=703 MISS | raw='sode 6' y=824 MISS | raw='Every Carry Item Explained' y=1000 MISS | raw='Dota 2 PowerPoints' y=1036 MISS
+[19:51:36.990] OCR 9 rows → raw='YouTube' y=41 MISS | raw='dore - pc' y=168 MISS | raw='dore - p,' y=250 MISS | raw='eVlewN' y=537 MISS | raw='2.ninja' y=621 MISS | raw='Ira Drop' y=703 MISS | raw='sode 6' y=824 MISS | raw='Every Carry Item Explained' y=1000 MISS | raw='Dota 2 PowerPoints' y=1036 MISS
+[19:51:37.234] OCR 9 rows → raw='YouTube' y=41 MISS | raw='dore - pc' y=168 MISS | raw='dore - p,' y=250 MISS | raw='eVlewN' y=537 MISS | raw='2.ninja' y=621 MISS | raw='Ira Drop' y=703 MISS | raw='sode 6' y=824 MISS | raw='Every Carry Item Explained' y=1000 MISS | raw='Dota 2 PowerPoints' y=1036 MISS
+[19:51:37.668] OCR 4 rows → raw='ZELI' y=42 MISS | raw='ZOLIN' y=308 MISS | raw='REFORGING BE' y=656 MISS | raw='ONE iPandemonium Charm, Lapi's Amulet' y=976 MISS
+[19:51:38.034] OCR 4 rows → raw='ZELI' y=42 MISS | raw='ZOLI N' y=308 MISS | raw='REFORGING BE' y=656 MISS | raw='iPandemonium Charm, Lapis Amulet' y=977 MISS
+[19:51:38.075] panel CLOSED brightness=50 avgPixel=#403621
+[19:51:39.614] heartbeat cycle=12 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#13101B brightness=20
+[19:51:43.320] heartbeat cycle=24 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#18161D brightness=25
+[19:51:47.018] heartbeat cycle=36 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:51:50.709] heartbeat cycle=48 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:51:54.399] heartbeat cycle=60 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:51:58.095] heartbeat cycle=72 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:52:01.780] heartbeat cycle=84 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:52:05.495] heartbeat cycle=96 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:52:09.229] heartbeat cycle=108 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2F2B2A brightness=44
+[19:52:11.080] paused (game not foreground) — foreground hwnd=723666 pid=37700 proc=explorer title='Task Switching'
+[19:52:38.226] resumed (game foreground)
+[19:52:39.174] heartbeat cycle=204 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:52:42.920] heartbeat cycle=216 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:52:46.659] heartbeat cycle=228 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:52:50.367] heartbeat cycle=240 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:52:54.090] heartbeat cycle=252 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:52:57.811] heartbeat cycle=264 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:53:01.526] heartbeat cycle=276 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:53:05.234] heartbeat cycle=288 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2A2B brightness=43
+[19:53:06.769] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[19:53:13.963] resumed (game foreground)
+[19:53:16.451] heartbeat cycle=324 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2D2A1D brightness=38
+[19:53:20.204] heartbeat cycle=336 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3A3525 brightness=49
+[19:53:23.956] heartbeat cycle=348 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3A3625 brightness=49
+[19:53:27.696] heartbeat cycle=360 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3725 brightness=50
+[19:53:29.854] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[19:53:47.008] resumed (game foreground)
+[19:53:50.124] heartbeat cycle=432 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3B28 brightness=54
+[19:53:53.852] heartbeat cycle=444 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A28 brightness=53
+[19:53:57.560] heartbeat cycle=456 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A27 brightness=53
+[19:53:57.862] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[19:54:48.980] resumed (game foreground)
+[19:54:49.910] heartbeat cycle=624 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3A3524 brightness=49
+[19:54:53.651] heartbeat cycle=636 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3A3625 brightness=49
+[19:54:57.376] heartbeat cycle=648 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3625 brightness=50
+[19:55:01.073] heartbeat cycle=660 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3726 brightness=50
+[19:55:04.807] heartbeat cycle=672 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3826 brightness=51
+[19:55:07.586] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'

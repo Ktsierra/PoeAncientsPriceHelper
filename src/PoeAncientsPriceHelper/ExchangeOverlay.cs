@@ -7,9 +7,13 @@ using System.Windows.Forms;
 
 namespace PoeAncientsPriceHelper;
 
-// One picker badge: the formatted ratio, the optional volume text, and the cell's OCR'd name-text
-// bounds (absolute screen px) the pill anchors to.
-internal sealed record ExchangeBadge(string Ratio, string? Volume, Rectangle CellBounds);
+// One picker badge: the formatted ratio, the optional volume text, the cell's full OCR'd name-text
+// bounds (absolute screen px, used for the panel's column geometry) and Anchor — the single line the
+// pill sits beside. They differ only for wrapped two-line names; null means they're the same.
+internal sealed record ExchangeBadge(string Ratio, string? Volume, Rectangle CellBounds, Rectangle? Anchor = null)
+{
+    public Rectangle AnchorBounds => Anchor ?? CellBounds;
+}
 
 // How trustworthy the poe.ninja snapshot behind the badges currently is (CLAUDE.md rule 4: a ratio
 // from a 30-minute-old snapshot is not a live quote — surface it).
@@ -202,8 +206,8 @@ internal sealed class ExchangeOverlayForm : Form
             var cells = new List<Rectangle>(_badges.Count);
             foreach (var b in _badges) cells.Add(b.CellBounds);
             var font = FontForPx(ExchangeBadgeLayout.UniformFontPx(cells));
-            var edges = ExchangeBadgeLayout.ColumnRightEdges(cells, _panelBounds);
-            foreach (var badge in _badges) PaintPill(g, badge, font, edges);
+            var columns = ExchangeBadgeLayout.Columns(cells, _panelBounds);
+            foreach (var badge in _badges) PaintPill(g, badge, font, columns);
             PaintStalenessChip(g);
         }
         else if (_mainText is { } text)
@@ -217,29 +221,37 @@ internal sealed class ExchangeOverlayForm : Form
         }
     }
 
-    // Pills are right-aligned inside their own grid column, so every pill on the panel shares an x for
-    // its column and none can reach the next column's label. Vertically centred on the cell, which
-    // keeps wrapped two-line names centred across both lines without changing their pill size.
-    private void PaintPill(Graphics g, ExchangeBadge badge, Font font, IReadOnlyList<int> columnRightEdges)
+    // Pills sit immediately after their own cell's name, so a pill is always adjacent to the currency
+    // it describes. This replaced right-aligning every pill in a column: uniform looked tidier in the
+    // abstract, but the column's right edge has to be inferred from OCR'd TEXT positions, and the
+    // game's label starts well inside its button (after the icon) — so the inferred edge landed in
+    // the gutter between two cells and left it genuinely unclear which currency a pill belonged to.
+    // Anchoring to the text needs no estimate of where the button border is.
+    //
+    // The column right edge is still computed, but only as a CLAMP for the rare name long enough that
+    // its pill would otherwise reach into the next column's label.
+    private void PaintPill(Graphics g, ExchangeBadge badge, Font font, PickerColumns columns)
     {
-        int columnRight = ExchangeBadgeLayout.ColumnRightFor(badge.CellBounds, columnRightEdges, _panelBounds);
+        var anchor = badge.AnchorBounds;
+        int columnRight = ExchangeBadgeLayout.RightFor(badge.CellBounds, columns, _panelBounds);
         int limit = Math.Min(columnRight, _screenBounds.Right) - 4;
 
         string? volume = badge.Volume;
         var size = g.MeasureString(Compose(badge.Ratio, volume), font);
-        // Would the pill land on this cell's own NAME? Right-aligned in the column, a pill starts at
-        // (columnRight - width); if that is left of the name's right edge it sits on the text. Drop the
-        // volume tail first — a shorter pill is worth more than the volume number. (Measuring against
-        // the cell's LEFT edge, as this first did, only caught pills wider than the whole cell.)
-        if (columnRight - (size.Width + PillPadX * 2) < badge.CellBounds.Right + PillGap && volume is not null)
+        int x = anchor.Right + PillGap;
+
+        // Too long for the space left in this column? Drop the volume tail first — a shorter pill is
+        // worth more than the volume number — and only then slide left off the clamp.
+        if (x + size.Width + PillPadX * 2 > limit && volume is not null)
         {
             volume = null;
             size = g.MeasureString(badge.Ratio, font);
         }
+        if (x + size.Width + PillPadX * 2 > limit)
+            x = limit - (int)size.Width - PillPadX * 2;
 
-        int x = limit - (int)size.Width - PillPadX * 2;
         x = Math.Max(x, _screenBounds.Left);
-        int y = badge.CellBounds.Top + (badge.CellBounds.Height - (int)size.Height) / 2 - PillPadY;
+        int y = anchor.Top + (anchor.Height - (int)size.Height) / 2 - PillPadY;
         PaintTextPill(g, badge.Ratio, volume, font, new Point(x, y));
     }
 

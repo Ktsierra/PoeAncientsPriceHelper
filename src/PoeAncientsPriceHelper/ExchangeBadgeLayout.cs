@@ -23,10 +23,16 @@ internal static class ExchangeBadgeLayout
     // bigger font. 1.5x sits comfortably between one line (1.0x) and two (~2.0x).
     private const double WrappedHeightRatio = 1.5;
 
-    // Column clustering: two cells belong to different columns when their x-centres differ by more
-    // than this fraction of the panel width. The picker is a 3-column grid, so real column gaps are
-    // ~1/3 of the panel; anything under a tenth is the same column with different-length names.
+    // Column clustering: two cells belong to different columns when their label LEFT edges differ by
+    // more than this fraction of the panel width. The picker is a 3-column grid, so real column gaps
+    // are ~1/3 of the panel; anything under a tenth is the same column.
     private const double ColumnSplitFraction = 0.10;
+
+    // Clearance between a pill's right edge and the next column's label, as a fraction of the column
+    // pitch, clamped so it stays sane from 1080p to 4K.
+    private const int GutterDivisor = 20;
+    private const int MinGutterPx = 4;
+    private const int MaxGutterPx = 24;
 
     // Uniform pill font height (px) for the whole picker.
     //
@@ -57,46 +63,82 @@ internal static class ExchangeBadgeLayout
     public static int FontPxForHeight(int cellHeightPx) =>
         Math.Clamp((int)(cellHeightPx * 0.62) / 2 * 2, 12, 22);
 
-    // Right-edge x for each column of the picker, ordered left to right.
+    // The picker grid's x geometry: each column's label LEFT edge, and the right edge a pill in that
+    // column must stop at.
     //
-    // Derived from the cells' x-centres rather than their text extents: text width varies wildly per
-    // name, but the centre of a grid cell's label is stable. A column's right edge is the midpoint
-    // between its centre and the next column's centre (so a pill can fill its own cell but never
-    // reach the neighbour's text); the last column extends to the panel's right edge.
-    public static IReadOnlyList<int> ColumnRightEdges(IReadOnlyList<Rectangle> cells, Rectangle panel)
+    // Left edges, NOT x-centres. This was the second in-game failure (pills "randomly around the
+    // square, not in a fixed position", and wrapped names looking like they had no badge at all).
+    // A centre is Left + Width/2, and Width is the OCR'd TEXT width — "Divine Orb" and "Omen of
+    // Chaotic Quantity" sit in the same column with centres ~80px apart. That made the derived
+    // boundary depend on which names happened to resolve on a given pass, so pills shifted every
+    // scan; and a long enough name's centre crossed into the next column's range, which drew its
+    // pill over the neighbour. Wrapped two-line cells were worst hit: the detector unions both
+    // fragments, and the tier numeral ("II"/"III") on the second line drags Left out and Width up.
+    //
+    // Every label in a column starts at the same x — right after the icon — whatever its length, so
+    // the left edge is the one quantity the game actually holds fixed.
+    public static PickerColumns Columns(IReadOnlyList<Rectangle> cells, Rectangle panel)
     {
-        if (cells.Count == 0) return [];
+        if (cells.Count == 0) return new PickerColumns([], []);
 
-        var centres = new List<int>(cells.Count);
-        foreach (var c in cells) centres.Add(c.Left + c.Width / 2);
-        centres.Sort();
+        var lefts = new List<int>(cells.Count);
+        foreach (var c in cells) lefts.Add(c.Left);
+        lefts.Sort();
 
         int split = Math.Max(1, (int)(panel.Width * ColumnSplitFraction));
-        var columnCentres = new List<int>();
+        var columnLefts = new List<int>();
         int runStart = 0;
-        for (int i = 1; i <= centres.Count; i++)
+        for (int i = 1; i <= lefts.Count; i++)
         {
-            if (i == centres.Count || centres[i] - centres[i - 1] > split)
+            if (i == lefts.Count || lefts[i] - lefts[i - 1] > split)
             {
-                columnCentres.Add((centres[runStart] + centres[i - 1]) / 2);
+                // Median of the run, so one wrapped cell's dragged-out left can't move the column.
+                columnLefts.Add(lefts[(runStart + i - 1) / 2]);
                 runStart = i;
             }
         }
 
-        var edges = new List<int>(columnCentres.Count);
-        for (int i = 0; i < columnCentres.Count; i++)
-            edges.Add(i == columnCentres.Count - 1
-                ? panel.Right
-                : (columnCentres[i] + columnCentres[i + 1]) / 2);
-        return edges;
+        // Column pitch, used only to give the LAST column the same width as the others. Stretching it
+        // to panel.Right (the old behaviour) tied it to the widest text on the panel, so the right
+        // column's pills drifted furthest and could land past the grid onto the scrollbar.
+        int pitch;
+        if (columnLefts.Count >= 2)
+        {
+            var gaps = new List<int>(columnLefts.Count - 1);
+            for (int i = 1; i < columnLefts.Count; i++) gaps.Add(columnLefts[i] - columnLefts[i - 1]);
+            gaps.Sort();
+            pitch = gaps[gaps.Count / 2];
+        }
+        else pitch = Math.Max(1, panel.Right - columnLefts[0]);
+
+        int gutter = Math.Clamp(pitch / GutterDivisor, MinGutterPx, MaxGutterPx);
+        var rights = new List<int>(columnLefts.Count);
+        for (int i = 0; i < columnLefts.Count; i++)
+        {
+            int nextLeft = i < columnLefts.Count - 1 ? columnLefts[i + 1] : columnLefts[i] + pitch;
+            rights.Add(nextLeft - gutter);
+        }
+        return new PickerColumns(columnLefts, rights);
     }
 
-    // The right edge of the column this cell sits in — the boundary a pill must not cross.
-    public static int ColumnRightFor(Rectangle cell, IReadOnlyList<int> columnRightEdges, Rectangle panel)
+    // The right edge of the column this cell sits in — the boundary a pill must not cross. Matched on
+    // the NEAREST column left rather than a "first edge past me" scan, so a wrapped cell whose union
+    // bounds start slightly left of its column still resolves to its own column instead of the
+    // previous one.
+    public static int RightFor(Rectangle cell, PickerColumns columns, Rectangle panel)
     {
-        int centre = cell.Left + cell.Width / 2;
-        foreach (int edge in columnRightEdges)
-            if (centre <= edge) return edge;
-        return columnRightEdges.Count > 0 ? columnRightEdges[^1] : panel.Right;
+        if (columns.Lefts.Count == 0) return panel.Right;
+
+        int best = 0, bestDist = int.MaxValue;
+        for (int i = 0; i < columns.Lefts.Count; i++)
+        {
+            int dist = Math.Abs(columns.Lefts[i] - cell.Left);
+            if (dist < bestDist) { bestDist = dist; best = i; }
+        }
+        return columns.Rights[best];
     }
 }
+
+// Column left edges and the matching pill right-stop, ordered left to right and always the same
+// length.
+internal sealed record PickerColumns(IReadOnlyList<int> Lefts, IReadOnlyList<int> Rights);

@@ -1,0 +1,27 @@
+[Debug] PoeAncientsPriceHelper starting
+[22:53:01.740] START prices=284 icons=True region={X=5,Y=30,Width=844,Height=1045}
+[overlay] region={X=5,Y=30,Width=844,Height=1045} screen={X=0,Y=0,Width=2560,Height=1440} bounds={X=0,Y=0,Width=2560,Height=1440} dpiForWindow=96
+[22:53:01.814] overlay ready
+[22:53:05.259] heartbeat cycle=12 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#342D1A brightness=41
+[22:53:08.974] heartbeat cycle=24 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3625 brightness=50
+[22:53:12.701] heartbeat cycle=36 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3A3625 brightness=49
+[22:53:16.427] heartbeat cycle=48 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3725 brightness=50
+[22:53:20.163] heartbeat cycle=60 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3725 brightness=50
+[22:53:23.878] heartbeat cycle=72 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3725 brightness=50
+[22:53:27.630] heartbeat cycle=84 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3726 brightness=51
+[22:53:31.339] heartbeat cycle=96 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3E3926 brightness=52
+[22:53:35.052] heartbeat cycle=108 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A27 brightness=53
+[22:53:38.805] heartbeat cycle=120 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#38311C brightness=44
+[22:53:42.555] heartbeat cycle=132 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3A3728 brightness=51
+[22:53:46.301] heartbeat cycle=144 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A28 brightness=53
+[22:53:50.030] heartbeat cycle=156 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A27 brightness=53
+[22:53:53.764] heartbeat cycle=168 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A27 brightness=53
+[22:53:57.489] heartbeat cycle=180 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3826 brightness=51
+[22:54:01.210] heartbeat cycle=192 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3826 brightness=51
+[22:54:04.943] heartbeat cycle=204 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3826 brightness=51
+[22:54:08.642] heartbeat cycle=216 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3826 brightness=51
+[22:54:12.355] heartbeat cycle=228 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3826 brightness=51
+[22:54:16.058] heartbeat cycle=240 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A28 brightness=53
+[22:54:19.804] heartbeat cycle=252 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A28 brightness=53
+[22:54:23.526] heartbeat cycle=264 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3E3928 brightness=53
+[22:54:26.910] loop exited

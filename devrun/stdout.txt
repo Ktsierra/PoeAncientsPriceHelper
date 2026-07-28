@@ -1,0 +1,157 @@
+[Debug] PoeAncientsPriceHelper starting
+[18:55:31.871] START prices=285 icons=True region={X=5,Y=30,Width=844,Height=1045}
+[overlay] region={X=5,Y=30,Width=844,Height=1045} screen={X=0,Y=0,Width=2560,Height=1440} bounds={X=0,Y=0,Width=2560,Height=1440} dpiForWindow=96
+[18:55:32.252] overlay ready
+[18:55:35.694] heartbeat cycle=12 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#39352E brightness=52
+[18:55:39.427] heartbeat cycle=24 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#39352E brightness=52
+[18:55:43.160] heartbeat cycle=36 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#332E1E brightness=42
+[18:55:46.882] heartbeat cycle=48 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#353116 brightness=41
+[18:55:50.634] heartbeat cycle=60 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#454129 brightness=58
+[18:55:54.393] heartbeat cycle=72 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#423F28 brightness=56
+[18:55:58.125] heartbeat cycle=84 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3A25 brightness=52
+[18:56:01.896] heartbeat cycle=96 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#403C27 brightness=54
+[18:56:04.660] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[18:56:12.476] resumed (game foreground)
+[18:56:13.100] heartbeat cycle=132 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#313023 brightness=44
+[18:56:16.807] heartbeat cycle=144 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#403C27 brightness=54
+[18:56:20.540] heartbeat cycle=156 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3A25 brightness=52
+[18:56:24.255] heartbeat cycle=168 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3925 brightness=51
+[18:56:27.991] heartbeat cycle=180 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3E3A26 brightness=52
+[18:56:31.716] heartbeat cycle=192 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2F2C17 brightness=38
+[18:56:35.477] heartbeat cycle=204 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#302C17 brightness=38
+[18:56:39.226] heartbeat cycle=216 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3E3B25 brightness=52
+[18:56:42.964] heartbeat cycle=228 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3A3723 brightness=49
+[18:56:46.658] heartbeat cycle=240 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3A25 brightness=52
+[18:56:50.389] heartbeat cycle=252 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3B26 brightness=53
+[18:56:54.104] heartbeat cycle=264 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#433F29 brightness=57
+[18:56:57.802] heartbeat cycle=276 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#423E29 brightness=56
+[18:57:01.547] heartbeat cycle=288 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#454029 brightness=58
+[18:57:05.294] heartbeat cycle=300 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#48432B brightness=60
+[18:57:09.038] heartbeat cycle=312 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#4A462C brightness=62
+[18:57:12.778] heartbeat cycle=324 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#454129 brightness=58
+[18:57:16.509] heartbeat cycle=336 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#46422A brightness=59
+[18:57:16.811] paused (game not foreground) — foreground hwnd=1313226 pid=37700 proc=explorer title=''
+[18:57:56.737] resumed (game foreground)
+[18:57:57.680] heartbeat cycle=468 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#191919 brightness=25
+[18:58:01.407] heartbeat cycle=480 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3C26 brightness=53
+[18:58:05.124] heartbeat cycle=492 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3C26 brightness=53
+[18:58:08.842] heartbeat cycle=504 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#423E28 brightness=56
+[18:58:12.571] heartbeat cycle=516 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#423D28 brightness=55
+[18:58:16.320] heartbeat cycle=528 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#423E28 brightness=56
+[18:58:20.013] heartbeat cycle=540 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#45412A brightness=58
+[18:58:23.735] heartbeat cycle=552 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#46422A brightness=59
+[18:58:27.451] heartbeat cycle=564 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#413D27 brightness=55
+[18:58:31.154] heartbeat cycle=576 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#403D27 brightness=54
+[18:58:34.874] heartbeat cycle=588 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#443F29 brightness=57
+[18:58:38.575] heartbeat cycle=600 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#191919 brightness=25
+[18:58:39.183] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[18:59:10.693] resumed (game foreground)
+[18:59:12.243] heartbeat cycle=708 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#1C1C1C brightness=28
+[18:59:15.976] heartbeat cycle=720 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3A25 brightness=52
+[18:59:19.696] heartbeat cycle=732 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3925 brightness=51
+[18:59:23.444] heartbeat cycle=744 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3B27 brightness=53
+[18:59:27.164] heartbeat cycle=756 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#403C28 brightness=54
+[18:59:30.879] heartbeat cycle=768 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#413D28 brightness=55
+[18:59:34.271] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[19:00:37.614] resumed (game foreground)
+[19:00:38.246] heartbeat cycle=984 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#403C27 brightness=54
+[19:00:41.980] heartbeat cycle=996 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#423D28 brightness=55
+[19:00:45.704] heartbeat cycle=1008 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#423D28 brightness=55
+[19:00:49.430] heartbeat cycle=1020 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#4A452F brightness=63
+[19:00:53.174] heartbeat cycle=1032 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#433F28 brightness=56
+[19:00:56.933] heartbeat cycle=1044 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#413D27 brightness=55
+[19:01:00.670] heartbeat cycle=1056 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#403C26 brightness=54
+[19:01:04.417] heartbeat cycle=1068 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#433F29 brightness=57
+[19:01:08.149] heartbeat cycle=1080 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#433F29 brightness=57
+[19:01:11.895] heartbeat cycle=1092 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#433F29 brightness=57
+[19:01:15.641] heartbeat cycle=1104 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#0B0B0B brightness=11
+[19:01:19.344] heartbeat cycle=1116 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#201E0C brightness=24
+[19:01:20.577] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='⠂ Build currency exchange overlay without conflicts'
+[19:01:20.888] resumed (game foreground)
+[19:01:23.089] heartbeat cycle=1128 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#191D1C brightness=27
+[19:01:26.810] heartbeat cycle=1140 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#232720 brightness=35
+[19:01:30.526] heartbeat cycle=1152 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#1B201C brightness=29
+[19:01:34.251] heartbeat cycle=1164 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#191D1C brightness=27
+[19:01:37.979] heartbeat cycle=1176 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2F1F14 brightness=32
+[19:01:41.681] heartbeat cycle=1188 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2F1F14 brightness=32
+[19:01:45.407] heartbeat cycle=1200 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#24211D brightness=32
+[19:01:49.125] heartbeat cycle=1212 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#31251C brightness=38
+[19:01:52.861] heartbeat cycle=1224 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#211D18 brightness=28
+[19:01:56.567] heartbeat cycle=1236 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#251F18 brightness=30
+[19:02:00.294] heartbeat cycle=1248 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#231E18 brightness=29
+[19:02:04.046] heartbeat cycle=1260 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#1D1A17 brightness=26
+[19:02:07.750] heartbeat cycle=1272 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#221D18 brightness=29
+[19:02:11.471] heartbeat cycle=1284 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#5D5863 brightness=93
+[19:02:15.187] heartbeat cycle=1296 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3E342E brightness=53
+[19:02:18.926] heartbeat cycle=1308 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#201B18 brightness=27
+[19:02:22.666] heartbeat cycle=1320 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2F2219 brightness=35
+[19:02:26.403] heartbeat cycle=1332 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#231F1D brightness=31
+[19:02:30.149] heartbeat cycle=1344 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#16100D brightness=17
+[19:02:33.889] heartbeat cycle=1356 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#1D1810 brightness=23
+[19:02:37.609] heartbeat cycle=1368 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#372D22 brightness=44
+[19:02:41.361] heartbeat cycle=1380 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#403128 brightness=51
+[19:02:45.096] heartbeat cycle=1392 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#181512 brightness=21
+[19:02:48.838] heartbeat cycle=1404 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#272325 brightness=37
+[19:02:52.573] heartbeat cycle=1416 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#14100C brightness=16
+[19:02:56.281] heartbeat cycle=1428 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#201A14 brightness=26
+[19:03:00.026] heartbeat cycle=1440 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#231E17 brightness=29
+[19:03:03.111] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[19:03:03.422] resumed (game foreground)
+[19:03:03.741] heartbeat cycle=1452 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#292118 brightness=32
+[19:03:06.851] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[19:03:19.007] resumed (game foreground)
+[19:03:22.458] heartbeat cycle=1512 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#28231C brightness=34
+[19:03:26.176] heartbeat cycle=1524 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#271E18 brightness=31
+[19:03:29.910] heartbeat cycle=1536 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#35271B brightness=39
+[19:03:33.608] heartbeat cycle=1548 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#181513 brightness=21
+[19:03:37.334] heartbeat cycle=1560 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#372C30 brightness=49
+[19:03:41.069] heartbeat cycle=1572 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#24201F brightness=33
+[19:03:44.765] heartbeat cycle=1584 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#14100D brightness=16
+[19:03:48.492] heartbeat cycle=1596 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#15110D brightness=17
+[19:03:52.221] heartbeat cycle=1608 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#1D1B23 brightness=30
+[19:03:55.952] heartbeat cycle=1620 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#372B27 brightness=45
+[19:03:59.693] heartbeat cycle=1632 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2B25 brightness=42
+[19:04:03.439] heartbeat cycle=1644 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A3B brightness=60
+[19:04:07.153] heartbeat cycle=1656 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#0F0D0D brightness=13
+[19:04:10.884] heartbeat cycle=1668 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#353344 brightness=57
+[19:04:14.613] heartbeat cycle=1680 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#181410 brightness=20
+[19:04:18.353] heartbeat cycle=1692 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#181410 brightness=20
+[19:04:22.082] heartbeat cycle=1704 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#1A1712 brightness=22
+[19:04:25.819] heartbeat cycle=1716 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2C2522 brightness=38
+[19:04:29.547] heartbeat cycle=1728 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#333138 brightness=52
+[19:04:33.292] heartbeat cycle=1740 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#363331 brightness=51
+[19:04:37.014] heartbeat cycle=1752 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#35333B brightness=54
+[19:04:40.763] heartbeat cycle=1764 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2E2218 brightness=34
+[19:04:44.498] heartbeat cycle=1776 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#1C1814 brightness=24
+[19:04:48.242] heartbeat cycle=1788 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#1C1716 brightness=24
+[19:04:51.940] heartbeat cycle=1800 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#0B0805 brightness=8
+[19:04:55.661] heartbeat cycle=1812 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#251C1C brightness=31
+[19:04:59.353] heartbeat cycle=1824 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#110E0C brightness=14
+[19:05:03.045] heartbeat cycle=1836 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#221B14 brightness=27
+[19:05:06.756] heartbeat cycle=1848 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#201813 brightness=25
+[19:05:10.461] heartbeat cycle=1860 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#1C1813 brightness=23
+[19:05:12.626] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='⠐ Build currency exchange overlay without conflicts'
+[19:05:23.245] resumed (game foreground)
+[19:05:25.437] heartbeat cycle=1908 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#403423 brightness=50
+[19:05:29.183] heartbeat cycle=1920 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#221D1D brightness=30
+[19:05:32.873] heartbeat cycle=1932 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#1D1D1B brightness=28
+[19:05:36.557] heartbeat cycle=1944 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#262320 brightness=35
+[19:05:40.297] heartbeat cycle=1956 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#1C1C1A brightness=27
+[19:05:44.032] heartbeat cycle=1968 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#262320 brightness=35
+[19:05:45.875] paused (game not foreground) — foreground hwnd=592134 pid=31180 proc=Sidekick title='Sidekick'
+[19:05:46.498] resumed (game foreground)
+[19:05:47.758] heartbeat cycle=1980 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#262320 brightness=35
+[19:05:51.503] heartbeat cycle=1992 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#262320 brightness=35
+[19:05:52.427] paused (game not foreground) — foreground hwnd=592134 pid=31180 proc=Sidekick title='Sidekick'
+[19:05:54.907] resumed (game foreground)
+[19:05:55.231] heartbeat cycle=2004 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#241F1B brightness=31
+[19:05:58.963] heartbeat cycle=2016 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#262320 brightness=35
+[19:06:02.666] heartbeat cycle=2028 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2D2A1D brightness=38
+[19:06:06.412] heartbeat cycle=2040 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#322F2B brightness=46
+[19:06:10.139] heartbeat cycle=2052 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#17161A brightness=23
+[19:06:13.859] heartbeat cycle=2064 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2D2A1D brightness=38
+[19:06:17.569] heartbeat cycle=2076 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#413524 brightness=51
+[19:06:21.315] heartbeat cycle=2088 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#0E0D0D brightness=13
+[19:06:25.055] heartbeat cycle=2100 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#0C0C0B brightness=11
+[19:06:28.776] heartbeat cycle=2112 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3422 brightness=49
+[19:06:31.558] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='⠐ Build currency exchange overlay without conflicts'
