@@ -9,6 +9,9 @@ It does not watch your screen. There is no OCR, no screen capture and no global 
 poe.ninja over HTTPS and draws a normal window. Put it on a second monitor, or keep it on top beside
 a windowed client.
 
+> Built for personal use — see [Where this came from](#where-this-came-from). It works, but it's not
+> a polished product.
+
 ```
 ┌─ Poe Currency Helper ─────────────────────────────┐
 │ League [Runes of Aldur ▾]   Base [Divine Orb ▾]   │
@@ -111,23 +114,26 @@ screen or installs global input hooks, which were the two behaviours heuristics 
 - **WPF UI** (lepoco) for theming
 - **Velopack** for the installer and automatic updates
 
-## Lineage
+## Where this came from
 
-This started as a fork of **Poe Ancients Price Helper**, a screen-overlay tool for logbook pricing
-and Verisium Remnants. v1.0 shares almost nothing with it: the OCR pipeline, screen capture, global
-hotkeys, the remnant helper and every overlay were removed, and only the poe.ninja layer, the ratio
-maths and the update plumbing carried over.
+This is a fork of **Poe Ancients Price Helper**, which reads your screen with OCR and draws prices
+over the game. I tried to make that same approach work on the Currency Exchange — badges drawn right
+onto the currency picker — and it didn't work. Scrolling left ghost badges behind, switching tabs
+broke it, OCR couldn't keep up with a list you're actively scrolling, and long names like "Perfect
+Orb of Augmentation" fill their cell completely so there's nowhere to draw anything.
 
-That approach was tried here first and abandoned for good reason — anchoring price badges to cells in
-the exchange picker cannot survive scrolling, tab switching, or currency names long enough to fill
-their cell. Reading the market instead of the screen sidesteps all three.
+The first two were fixable. The last two weren't, so I stopped fighting it and rewrote the whole
+thing to read the market instead of the screen. That's what this is. The OCR attempt is still in the
+git history on the `feat/currency-exchange-helper` branch if you're curious what didn't work.
 
-The original project's history through v3.8.0 remains in this repository's git history. Full
-attribution — including which files carried over — is in [NOTICE.md](NOTICE.md).
+**Made for my own use.** It does one thing and it does it fine, but don't expect wonders — no
+polish pass, no support promises, and it'll break whenever poe.ninja changes their API or a new
+league needs adding. Full attribution and which files carried over from the original are in
+[NOTICE.md](NOTICE.md).
 
-> **Licence status is unresolved.** Neither this repository nor the project it was forked from
-> carries a LICENCE file, which under default copyright means no permission to redistribute. See
-> [NOTICE.md](NOTICE.md) for what would resolve it. Until then, please don't redistribute builds.
+> **No licence yet.** Neither this repo nor the one it was forked from has a LICENCE file, so
+> strictly there's no permission to redistribute it. Fine for personal use; see
+> [NOTICE.md](NOTICE.md) before sharing builds around.
 
 ## Acknowledgements
 

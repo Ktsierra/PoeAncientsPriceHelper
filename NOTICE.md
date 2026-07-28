@@ -1,15 +1,22 @@
 # Notice — origin and attribution
 
-## Lineage
+## Where this came from
 
-**Poe Currency Helper** began as a fork of **Poe Ancients Price Helper** by
-*pedro*, a screen-overlay tool for Path of Exile 2 logbook pricing and Verisium
-Remnants.
+**Poe Currency Helper** is a fork of **Poe Ancients Price Helper** by *pedro*, a
+screen-overlay tool for Path of Exile 2 logbook pricing and Verisium Remnants.
 
-Version 1.0.0 is a substantial rewrite rather than an evolution. The OCR
-pipeline, screen capture backends, global input hooks, the Island Rumour /
-Verisium Remnant helper, the logbook price scanner, the calibration flow and
-every overlay were removed. What carried over from the original project is:
+The fork started as an attempt to make that same OCR-overlay approach work on
+the in-game Currency Exchange. It failed — a scrolling, tab-switching panel with
+cells full of text is not something you can reliably read off the screen and draw
+onto — so v1.0 dropped the screen entirely and reads the market instead. The
+abandoned attempt is preserved on the `feat/currency-exchange-helper` branch.
+
+It is written for personal use, not as a supported product.
+
+Version 1.0.0 is therefore a rewrite rather than an evolution. The OCR pipeline,
+screen capture backends, global input hooks, the Island Rumour / Verisium Remnant
+helper, the logbook price scanner, the calibration flow and every overlay were
+removed. What carried over from the original project is:
 
 - the poe.ninja fetch layer and its response parsing,
 - the exchange ratio maths and its normalization (`ExchangeRates`),
@@ -26,9 +33,9 @@ git history and is not rewritten or squashed away.
 from.**
 
 Under default copyright, code published without a licence grants no permission
-to copy, modify or redistribute it. That makes the legal footing for
-redistributing this fork — as a binary release or as source — unclear, however
-substantial the rewrite is, because some original code remains.
+to copy, modify or redistribute it. For personal use that is academic; it only
+matters if builds get shared around, and it applies however substantial the
+rewrite is, because some original code remains.
 
 This is not something a fork can fix unilaterally. Resolving it means one of:
 
