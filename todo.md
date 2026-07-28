@@ -393,6 +393,99 @@ native resolution in-game; to be confirmed against the real client.
 
 ---
 
+## 2026-07-28 — DIRECTION CHANGE: per-cell overlay is being retired
+
+**Mac: please read this before anything else in this file.** In-game testing
+killed the per-cell badge approach. This reverses a design decision, so the
+reasoning is recorded in full.
+
+### What in-game testing found
+
+Tester ran it against the real client repeatedly. Four failures:
+
+1. **Scrolling the picker leaves ghost badges.** Partly my fault — the
+   `ExchangePickerStabilizer` I added deliberately re-emits cells unseen for up
+   to 3 passes (~2.7 s). That is correct for a static panel and actively wrong
+   for a scrolling one: it *manufactures* ghosts.
+2. **Switching category tabs quickly (Abyssal / Breach / Omens) breaks it.**
+3. **OCR is too slow.** A full-frame pass at ~900 ms cannot track a grid the
+   user is actively scrolling — the overlay always describes a screen that has
+   already changed.
+4. **Dense cells leave no room for a pill.** "Perfect Orb of Augmentation" and
+   "Perfect Orb of Transmutation" wrap to two lines and fill their cell
+   completely. There is nowhere to draw anything.
+
+### Which of those are structural
+
+1 and 2 are tunable (detect the panel changed, reset). **3 and 4 are not.**
+
+Latency is inherent to full-frame OCR at this cadence. And (4) is fatal to the
+entire idea of in-cell anchoring, mine included: if the cell is full of text,
+no layout algorithm creates space. Uniform sizing and column clamping made the
+pills tidier without touching the actual problem.
+
+Tester's summary, which is correct: *"it works for verisium remnants cuz its
+static, it does not for dynamic market comparisons."* The remnant panel is
+static, finite and sparse. The exchange picker is none of those.
+
+### The reframe
+
+The market data was never the hard part — poe.ninja gives it to us cleanly and
+that half is verified working. The hard part is tracking **where things are on
+screen**. So stop tracking.
+
+The only thing genuinely needed from the screen is **which currency is the
+base**, and there is already a reliable non-OCR path for that: the manual base
+dropdown in Settings. That collapses the OCR requirement from "read and track
+~50 moving cells at 1 Hz" to "optionally notice the exchange is open" — a
+nice-to-have that can fail without breaking correctness.
+
+### Agreed direction: a companion panel
+
+Chosen by the tester from three options. A fixed, draggable, always-on-top
+window showing the full ratio table for the selected base:
+
+```
+┌─ Exchange Helper ────── snapshot 4m old ─┐
+│ Base: Divine Orb          [change]       │
+├──────────────────────────────────────────┤
+│ Exalted Orb        188 : 1      1.4k vol │
+│ Chaos Orb          8.8 : 1       69k vol │
+│ Regal Orb          1.2k : 1      320 vol │
+│ Perfect Orb of Aug 1 : 2.4      1.1k vol │
+│ Mirror of Kalandra 1 : 6k         12 vol │
+└──────────────────────────────────────────┘
+```
+
+Why this shape:
+
+- **Scroll, tab-switch and ghosting stop being possible failure modes** — there
+  is nothing anchored to a cell to go stale.
+- **Volume always fits.** The tester wanted volume and it kept being dropped for
+  space; in a panel there is no space pressure.
+- **Degrades to fully working with zero OCR.** Base comes from the dropdown.
+- Accepted tradeoff: you read across to the panel rather than seeing the number
+  beside the cell you're looking at.
+
+### What this retires
+
+Superseded, kept in-tree until Mac reviews rather than deleted unilaterally:
+
+- `ExchangeOverlay.cs` — per-cell layered overlay
+- `ExchangeBadgeLayout.cs` — my column/font geometry (W-6), moot without cells
+- `ExchangePickerStabilizer.cs` — moot, and the ghost source
+- Picker detection + cell resolution in `ExchangeScreenDetector` /
+  `ExchangeNameResolver` — the expensive full-frame pass
+
+### What survives
+
+- `PriceRepository` exchange fetch + snapshot — verified working, unchanged
+- `ExchangeRates` — the ratio maths and normalization are correct and stay
+- `ExchangeDiag`
+- The cheap top-band gate, **optionally**, purely to auto-show the panel
+
+---
+
 ## Might do — configurable exchange scan region
 
 Raised by the tester: *"would it be better if we did the same thing remnants do
