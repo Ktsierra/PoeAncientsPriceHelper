@@ -1,0 +1,95 @@
+<Window x:Class="PoeCurrencyHelper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Poe Currency Helper" Height="620" Width="460"
+        MinHeight="300" MinWidth="380"
+        Icon="app.ico"
+        Background="{DynamicResource ApplicationBackgroundBrush}"
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+        Loaded="Window_Loaded" Closing="Window_Closing">
+
+    <Window.Resources>
+        <Style x:Key="Label" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#9AA0AA"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- League + base currency: the only two things the user has to choose. -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="League" Style="{StaticResource Label}" Margin="0,0,6,0"/>
+            <ComboBox  Grid.Column="1" x:Name="LeagueBox" SelectionChanged="LeagueBox_SelectionChanged"/>
+            <TextBlock Grid.Column="2" Text="Base" Style="{StaticResource Label}" Margin="10,0,6,0"/>
+            <ComboBox  Grid.Column="3" x:Name="BaseBox" IsEditable="True" IsTextSearchEnabled="True"
+                       SelectionChanged="BaseBox_SelectionChanged"/>
+        </Grid>
+
+        <!-- Filter + sort. Typing here is the fastest way to find one currency in a list of ~200. -->
+        <Grid Grid.Row="1" Margin="0,8,0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" x:Name="FilterBox" TextChanged="FilterBox_TextChanged"
+                     ToolTip="Filter by name"/>
+            <TextBlock Grid.Column="1" Text="Sort" Style="{StaticResource Label}" Margin="10,0,6,0"/>
+            <ComboBox Grid.Column="2" x:Name="SortBox" Width="110" SelectionChanged="SortBox_SelectionChanged"/>
+        </Grid>
+
+        <DataGrid Grid.Row="2" x:Name="Table"
+                  AutoGenerateColumns="False" IsReadOnly="True"
+                  HeadersVisibility="Column" GridLinesVisibility="None"
+                  CanUserSortColumns="False" CanUserResizeRows="False"
+                  Background="Transparent" RowBackground="Transparent"
+                  AlternatingRowBackground="#14FFFFFF" BorderThickness="0"
+                  VerticalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Currency" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Ratio" Binding="{Binding Ratio}" Width="Auto"/>
+                <!-- Volume = value traded, in the base/primary currency. Units = how much stock that
+                     actually represents, which volume alone hides: ~429k chaos and ~16 mirrors both
+                     move a similar number of divines. -->
+                <DataGridTextColumn Header="Volume" Binding="{Binding Volume}" Width="Auto"/>
+                <DataGridTextColumn Header="Units" Binding="{Binding Units}" Width="Auto"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="3" Margin="0,8,0,0">
+            <TextBlock x:Name="StatusText" Style="{StaticResource Label}" TextWrapping="Wrap"/>
+            <Grid Margin="0,6,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <CheckBox Grid.Column="0" x:Name="TopmostBox" Content="Always on top"
+                          Foreground="#9AA0AA" FontSize="11" VerticalAlignment="Center"
+                          Checked="TopmostBox_Changed" Unchecked="TopmostBox_Changed"/>
+                <CheckBox Grid.Column="1" x:Name="HideNoDataBox" Content="Hide no-data"
+                          Foreground="#9AA0AA" FontSize="11" VerticalAlignment="Center" Margin="12,0,0,0"
+                          Checked="HideNoDataBox_Changed" Unchecked="HideNoDataBox_Changed"/>
+                <Button Grid.Column="3" x:Name="RefreshButton" Content="Refresh"
+                        Padding="14,4" Click="RefreshButton_Click"/>
+            </Grid>
+            <TextBlock Style="{StaticResource Label}" Margin="0,6,0,0" FontSize="10"
+                       Text="Market data from poe.ninja. Aggregates, not live order-book quotes."/>
+        </StackPanel>
+    </Grid>
+</Window>

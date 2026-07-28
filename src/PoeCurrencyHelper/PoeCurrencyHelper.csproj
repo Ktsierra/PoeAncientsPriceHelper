@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>PoeCurrencyHelper</RootNamespace>
+    <!-- Explicit entry point: VelopackApp.Build().Run() must execute before any other startup logic
+         (install/update/uninstall hooks). WPF would otherwise auto-generate Main from App.xaml's
+         ApplicationDefinition; we demote App.xaml to a Page (below) and own Main in Program.cs. -->
+    <StartupObject>PoeCurrencyHelper.Program</StartupObject>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyTitle>Poe Currency Helper</AssemblyTitle>
+    <Product>Poe Currency Helper</Product>
+    <Description>Live poe.ninja currency-exchange ratios for Path of Exile 2, in a companion panel beside the game.</Description>
+    <Version>1.0.0</Version>
+    <Authors>pedro</Authors>
+    <Company>pedro</Company>
+    <Copyright>Copyright (c) 2026 pedro</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="app.ico" />
+  </ItemGroup>
+
+  <!-- Demote App.xaml from ApplicationDefinition (which would generate its own Main) to a Page, so
+       Program.Main is the single entry point. -->
+  <ItemGroup>
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" SubType="Designer" Generator="MSBuild:Compile" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="PoeCurrencyHelper.Tests" />
+  </ItemGroup>
+
+  <!-- v1.0 reads poe.ninja over HTTP and draws a WPF window. No screen capture, no OCR and no global
+       input hooks, so SharpHook and the Vortice D3D11/DXGI stack the old overlay needed are gone.
+       Dropping the Windows SDK TFM (net10.0-windows10.0.19041.0 -> net10.0-windows) with them: that
+       version pin existed for WinRT OCR and WGC capture, neither of which ships here. -->
+  <ItemGroup>
+    <PackageReference Include="Velopack" Version="1.2.0" />
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
+</Project>
