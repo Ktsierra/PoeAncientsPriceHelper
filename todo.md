@@ -486,6 +486,88 @@ Superseded, kept in-tree until Mac reviews rather than deleted unilaterally:
 
 ---
 
+## 2026-07-28 — v1.0 rewrite done, on a separate branch
+
+Built on **`feat/currency-helper-v1`** (commit `810684b`), branched off
+`feat/currency-exchange-helper`. **Not** on your branch — deleting 3,400 lines
+of your work isn't something to force onto a shared branch. Nothing is pushed.
+
+Build clean, 0 warnings, **54 tests pass**. Runs, fetches live, verified against
+Runes of Aldur: 556 currencies priced against Divine Orb.
+
+### Scope, as decided by the tester
+
+Everything except the currency exchange is gone — "we are building something new
+and different that will not require even the OCR". Renamed throughout to
+**Poe Currency Helper**, version reset to **1.0.0**.
+
+| | Before | After |
+|---|---|---|
+| App source | 43 files | 16 files |
+| Release output | 40.9 MB / 38 files | **8.3 MB / 9 files** |
+| Dependencies | + SharpHook, Vortice ×2 | Velopack, WPF-UI, Newtonsoft |
+| TFM | `net10.0-windows10.0.19041.0` | `net10.0-windows` |
+| Tests | 376 | 54 |
+
+The TFM pin existed only for WinRT OCR and WGC capture, so it went with them.
+
+**Deleted:** all OCR and screen capture, global input hooks, the rumour/Verisium
+subsystem, the logbook price scanner, every overlay, locales, calibration.
+**Kept:** the poe.ninja fetch, `ExchangeRates` and its normalization, Happy
+Eyeballs, the Velopack entry point, config/paths plumbing.
+
+### The panel
+
+League + base pickers, name filter (556 rows needs one), four sort modes,
+always-on-top, hide-no-data, remembered window placement with an off-screen
+guard. Notably it is **not** capture-excluded, unlike the old overlay — so it
+can be screenshotted, which makes remote debugging possible at all.
+
+### Units-moved column (tester's idea, and a good one)
+
+Volume is a *value*; it hides how much stock actually moved. Live figures:
+
+```
+Mirror of Kalandra   80.1k div moved   ->     17 units
+Chaos Orb            49.1k div moved   -> 429,000 units
+```
+
+Mirrors move MORE divines than chaos while ~26,000x less stock changes hands.
+
+poe.ninja exposes no transaction count — the full line shape is
+`id, maxVolumeCurrency, maxVolumeRate, primaryValue, sparkline,
+volumePrimaryValue` — so this is derived as `volume ÷ unit price`. It counts
+**items moved, not trades**: one bulk purchase of 400 chaos and 400 separate
+trades are indistinguishable. Caveat is in the code comments and the README.
+
+### Docs
+
+`README.md` and `CHANGELOG.md` rewritten for the new product. The changelog
+records why the overlay approach was abandoned, so the decision isn't lost. Both
+carry a **Lineage** section crediting the original project and noting its history
+through v3.8.0 lives in git.
+
+### Open questions for you
+
+1. **Do you want the old branch kept?** `feat/currency-exchange-helper` still has
+   the full per-cell overlay work — W-6/W-7 fixes and all. It's superseded but
+   it's the record of what was tried and why. My inclination is keep it.
+2. **The repo is still named `PoeAncientsPriceHelper`** on GitHub and on disk.
+   Renaming is a GitHub-side action plus a re-clone.
+3. **Provenance.** The app now shares almost no code with upstream, but
+   `CONTRIBUTING.md` and the copyright still name the original author. Fine for a
+   private fork; worth stating explicitly if this ships under a new name. I put a
+   Lineage section in the README as a starting point — your call whether that's
+   enough.
+
+### Not done
+
+- No release cut. `vpk` isn't installed and 1.0.0 hasn't been packaged.
+- `CONTRIBUTING.md` still describes the old contribution rules (including the
+  localization section, which no longer applies with the locale files gone).
+
+---
+
 ## Might do — configurable exchange scan region
 
 Raised by the tester: *"would it be better if we did the same thing remnants do

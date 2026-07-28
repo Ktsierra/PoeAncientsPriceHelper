@@ -1,195 +1,134 @@
-# Poe Ancients Price Helper
+# Poe Currency Helper
 
-A lightweight screen overlay for **Path of Exile 2**. It watches a calibrated region of your screen,
-reads the currency / reward list with OCR, looks up live prices from [poe.ninja](https://poe.ninja/poe2),
-and draws a click-through price overlay next to each item — so you never have to alt-tab to check what a
-stack is worth.
+A companion window for the **Path of Exile 2** Currency Exchange. Pick a league and a base currency,
+and it shows every tradeable currency priced against it — live from
+[poe.ninja](https://poe.ninja/poe2) — alongside how much value **and how much actual stock** the
+market moved.
+
+It does not watch your screen. There is no OCR, no screen capture and no global hotkeys: it reads
+poe.ninja over HTTPS and draws a normal window. Put it on a second monitor, or keep it on top beside
+a windowed client.
+
+```
+┌─ Poe Currency Helper ─────────────────────────────┐
+│ League [Runes of Aldur ▾]   Base [Divine Orb ▾]   │
+│ [filter…]                     Sort [Most value ▾] │
+├───────────────────────────────────────────────────┤
+│ Currency              Ratio      Volume    Units  │
+│ Mirror of Kalandra    1 : 4.9k   80.1k div    17  │
+│ Chaos Orb             8.75 : 1   49.1k div  429k  │
+│ Omen of Light         1 : 12     28.2k div  2.3k  │
+│ Hinekora's Lock       1 : 1.2k   24.7k div    21  │
+├───────────────────────────────────────────────────┤
+│ 556 currencies priced against Divine Orb          │
+│ snapshot less than a minute old                   │
+└───────────────────────────────────────────────────┘
+```
+
+## What the numbers mean
+
+**Ratio** — the exchange rate, normalized the way players actually quote it: the cheaper side is
+always `1`. Exalted reads `188 : 1 div`, a mirror reads `1 : 4.9k div`. The base side is named so
+there is never a question of which way round it is, and the base is whatever *you* pick — nothing
+assumes Divine.
+
+**Volume** — the value the market moved, denominated in the league's primary currency.
+
+**Units** — how much *stock* that value represents. This is the column volume alone hides: mirrors
+move **more** divines than chaos (80.1k vs 49.1k) while only ~17 mirrors change hands against
+~429,000 chaos. Sort by it to see what is genuinely liquid rather than merely expensive.
+
+> Units is **derived**, not reported. poe.ninja exposes no transaction count, so this is
+> `volume ÷ unit price` — the number of items moved, **not** the number of trades. One bulk purchase
+> of 400 chaos and 400 separate trades look identical here.
+
+All figures are **market aggregates from a periodic snapshot** (refreshed every 30 minutes; the
+status line shows its age), not live order-book quotes. Treat them as a guide to where the market
+is, not as an executable price.
 
 ## Features
 
-- **Live prices** next to each list row, sourced from poe.ninja (auto-refreshed every 30 minutes).
-- **Stack-aware** — shows the total and the per-item price, e.g. `2 (0.5 each)`.
-- **Uncut gems** (skill / spirit / support) priced by exact type **and level** — a row shows `?`
-  rather than a guessed price if the gem type or level can't be read cleanly (neighbouring levels
-  can differ several-fold, so a wrong-level price would be misleading).
-- **GPU-accelerated capture** — uses Windows Graphics Capture (WGC) by default for low CPU usage,
-  with automatic fallback to legacy GDI if WGC is unavailable.
-- **Windows OCR engine** — uses the native `Windows.Media.Ocr` (WinRT) for fast, accurate detection
-  of on-screen text. No external OCR dependencies.
-- **Automatic updates (since v3.0.0)** — installs and updates itself from GitHub Releases. When a new
-  version is out, click **Update now** in the app (or just close it and the update is applied silently
-  the next time you launch). No re-downloading, no re-unzipping, and **your calibration and settings are
-  kept**. See [How updates work](#how-updates-work).
-- **Click-through overlay** that never gets in the way of the game.
-- **One-time calibration** — just drag a box around the in-game list panel.
-- **Hotkeys:** `F5` start/stop · `F4` recalibrate · `F3` debug boxes · `Esc` / `Ctrl+Click` hide.
-- **Minimize to tray** — scanning keeps running in the background.
-- **🎨 Theme switcher** — 5 dark themes (Toxic, Midnight, Obsidian, Abyss, Ember). Defaults to
-  **Toxic** — its dark green gradient complements the green Start button while keeping the same
-  low-light feel.
-- **🗺️ Island Rumour helper (experimental)** — optionally watches the Atlas and shows each rumour's
-  map / mods / rating (from a community spreadsheet) next to the *Uncharted Waters / Island Rumours*
-  panel. It finds the Atlas by the **WORLD** label automatically; on windowed / custom-resolution
-  setups where that can't be read, turn off auto-detect in **Settings** and drag a box over the WORLD
-  label yourself.
-- **Pauses when you tab away** — scanning stops while the game isn't the active window and resumes
-  when you return, so it isn't wasting cycles in the background. If it ever misbehaves on an unusual
-  focus setup, you can turn this off in **Settings → “Only scan while Path of Exile is the active
-  window”** to keep pricing running regardless of what's in front.
+- Every poe.ninja PoE2 exchange category in one table — currency, runes, fragments, essences, soul
+  cores, breach, delirium, ritual, idols, abyss, expedition, uncut gems, verisium.
+- **Any base currency**, not just Divine or Exalted — pick from the live list for your league.
+- **Filter by name** and sort by value moved, units moved, price or name.
+- **Softcore and Hardcore** — Hardcore prices in exalted rather than divine, and the app follows the
+  league's primary currency rather than assuming.
+- **Always on top** (optional) so it survives a windowed-fullscreen client.
+- Remembers window position and size, with a guard so a panel left on a since-disconnected monitor
+  still opens on screen.
+- **Automatic updates** from GitHub Releases, powered by [Velopack](https://velopack.io/). Your
+  settings live in `%LocalAppData%\PoeCurrencyHelper` and are kept across updates.
 
 ## Download & install
 
-Grab **`PoeAncientsPriceHelper-win-Setup.exe`** from the [**Releases**](../../releases) page and run it.
-It installs per-user (no admin required) and launches the app. No .NET runtime needed — it's a
-self-contained Windows x64 build.
-
-That's the **only** time you'll download it by hand: from then on the app keeps itself up to date and
-remembers your calibration and settings (see [How updates work](#how-updates-work)).
+Grab **`PoeCurrencyHelper-win-Setup.exe`** from the [**Releases**](../../releases) page and run it.
+It installs per-user (no admin required).
 
 > Windows SmartScreen may warn that the app is unsigned — click **More info → Run anyway**.
 
-> **Upgrading from the old zip (v2.x or earlier)?** This is the last manual step. Run the new
-> `Setup.exe` once; because the app now stores settings in a stable location, you'll re-pick your
-> league and re-calibrate **one final time** — after that, updates are automatic and your settings
-> persist across them.
+## Build from source
 
-## How updates work
+Requires the **.NET 10 SDK**
+([download](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)) and Windows 10 or 11.
 
-The app updates itself straight from this repo's GitHub Releases — there's no separate update server.
+```sh
+dotnet build PoeCurrencyHelper.sln -c Release
+dotnet test  PoeCurrencyHelper.sln -c Release
 
-- On startup it quietly checks for a newer release and, if there is one, downloads it in the background.
-- When ready, an **Update now** link appears in the settings window — click it to install and relaunch
-  instantly into the new version.
-- Prefer not to interrupt what you're doing? Just ignore it. The next time you **close** the app, the
-  staged update is applied silently, so you're already on the new version the next time you open it.
-- Your `config.json` (calibration, league, hotkeys, theme) lives in `%LocalAppData%\PoeAncientsPriceHelper`
-  and is **kept across updates** — updating never resets your settings.
-
-Updating is powered by [Velopack](https://velopack.io/) (see [Acknowledgements](#acknowledgements)).
+# self-contained release build
+dotnet publish src/PoeCurrencyHelper/ -c Release -r win-x64 --self-contained true -o publish
+```
 
 ## Troubleshooting
 
-### Prices won't load / poe.ninja fetches keep failing
+### Prices won't load
 
-On some connections (Starlink and other CGNAT setups are the usual culprits) the IPv6 network path
-is broken even though IPv4 works fine. Since `poe.ninja` resolves to both IPv6 and IPv4 addresses,
-the app can end up trying the dead IPv6 route and stalling until each request times out — so prices
-never appear.
+**"poe.ninja returned nothing for league …"** — the league name is sent verbatim to poe.ninja's API.
+Check it matches a league that exists on [poe.ninja/poe2](https://poe.ninja/poe2); a new league needs
+its name added to the dropdown.
 
-**As of v3.5.7 this is handled automatically** — the app races the IPv4 and IPv6 routes and uses
-whichever connects first, so a dead IPv6 path falls back to IPv4 on its own. Just update and it
-should work; no firewall rule needed.
+**Fetches hang or fail on Starlink / CGNAT connections.** poe.ninja resolves to both IPv6 and IPv4,
+and on a connection where the IPv6 path is broken the default behaviour stalls until each request
+times out. The app races both families and uses whichever connects first, so a dead IPv6 route falls
+back to IPv4 on its own — no firewall rule needed.
 
-If you're on an older version and can't update, you can force the app onto IPv4 by blocking its
-outbound IPv6 traffic with a firewall rule. Open **Windows PowerShell as Administrator** and run:
+### Some antivirus software flags it
 
-```powershell
-New-NetFirewallRule -DisplayName "Block IPv6 - PoeAncientsPriceHelper" `
-  -Direction Outbound `
-  -Program "C:\Users\<YOUR-USERNAME>\AppData\Local\PoeAncientsPriceHelper\current\PoeAncientsPriceHelper.exe" `
-  -RemoteAddress "::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff" `
-  -Protocol TCP `
-  -Action Block
-```
+Unsigned, new, and downloaded by few people, so reputation- and ML-based engines sometimes return
+verdicts like `FileRepMalware`. These are prevalence heuristics ("rare and unsigned"), not a match
+against known malware. The full source is in this repo and you can build it yourself instead of
+trusting the prebuilt download.
 
-Replace `<YOUR-USERNAME>` with your Windows username (the path above is the default install
-location). Restart the app and prices should load over IPv4.
-
-To undo it later:
-
-```powershell
-Remove-NetFirewallRule -DisplayName "Block IPv6 - PoeAncientsPriceHelper"
-```
-
-> Thanks to the community for diagnosing this one.
-
-### The overlay stays hidden / prices never appear while I'm playing
-
-The overlay pauses itself while Path of Exile isn't the active window (so it isn't scanning in the
-background). On most setups it resumes the moment you're back in the game, but some unusual focus
-configurations can make it read the game as “not in front” even while you're playing — the overlay
-then stays hidden. If that happens, open **Settings** and untick **“Only scan while Path of Exile is
-the active window.”** Pricing will then run regardless of what's focused. (The **Open logs** link on
-the main window shows a `paused (game not foreground)` line with the window that grabbed focus, if
-you want to report the setup.)
-
-### Some antivirus software flags it as malware
-
-Some antivirus engines may flag the download with reputation- or ML-based verdicts (names like
-`FileRepMalware` or a `*.ml.score` "moderate" score). **These are false positives**, and here's
-exactly why they happen:
-
-- The app is **unsigned** (no code-signing certificate — those cost money a free tool doesn't have).
-- It's a **new, self-contained build** that few people have downloaded yet, so it has no established
-  file reputation. Verdicts like these are *prevalence*-based — "this file is rare and unsigned" —
-  **not** a match against any known malware.
-- It does exactly the things heuristics are trained to be suspicious of: **captures the screen**,
-  registers **global hotkeys**, and makes **network requests** — all of which are core, documented
-  features of a price overlay.
-
-Your reassurance is that **the full source is right here in this repo** — you can read every line,
-and you can build it yourself (see [Build from source](#build-from-source)) instead of trusting the
-prebuilt download. The vast majority of engines return clean; only a handful of reputation/ML
-heuristics trip on a new, unsigned binary.
-
-If you'd like, you can help by reporting the false positive to your antivirus vendor — most have a
-"submit a false positive" form. These verdicts clear on their own as the release ages and more
-people download it.
-
-## Build from source
-
-Requires the **.NET 10 SDK** ([download](https://dotnet.microsoft.com/en-us/download/dotnet/10.0))
-and **Windows 10 version 2004+** / Windows 11.
-
-```sh
-# restore + build
-dotnet build src/
-
-# run tests
-dotnet test src/PoeAncientsPriceHelper.Tests/
-
-# build a self-contained release
-dotnet publish src/PoeAncientsPriceHelper/ -c Release -r win-x64 --self-contained true -o publish
-```
-
-## Capture backend
-
-The screen capture method is configurable via `config.json`:
-
-| Value | Description |
-|---|---|
-| `"Auto"` (default) | Uses WGC (GPU-based) with automatic GDI fallback per frame |
-| `"GDI"` | Forces legacy BitBlt capture (higher CPU, universal compatibility) |
-
-WGC requires Windows 10 2004+. If WGC fails at runtime, the app silently falls back to GDI without
-crashing.
+Worth noting that v1.0 is a much smaller target than its predecessor: it no longer captures the
+screen or installs global input hooks, which were the two behaviours heuristics objected to most.
 
 ## Tech
 
-- **.NET 10** (`net10.0-windows10.0.19041.0`) — WPF (settings window) + WinForms (overlay)
-- **Windows.Media.Ocr** (WinRT) for OCR — no external dependencies
-- **Windows Graphics Capture** via Vortice.Direct3D11 + WinRT interop for screen capture
-- **poe.ninja** API for live price data (parallel fetch over HTTP/2, 30-min auto-refresh)
-- **SharpHook** for global hotkeys
-- **WPF UI** (lepoco) for the settings window UI
+- **.NET 10** (`net10.0-windows`), WPF
+- **poe.ninja** API for market data — all 13 exchange categories fetched concurrently, 30-minute
+  auto-refresh with fast retry after a failure
+- **WPF UI** (lepoco) for theming
 - **Velopack** for the installer and automatic updates
+
+## Lineage
+
+This started as a fork of **Poe Ancients Price Helper**, a screen-overlay tool for logbook pricing
+and Verisium Remnants. v1.0 shares almost nothing with it: the OCR pipeline, screen capture, global
+hotkeys, the remnant helper and every overlay were removed, and only the poe.ninja layer, the ratio
+maths and the update plumbing carried over.
+
+That approach was tried here first and abandoned for good reason — anchoring price badges to cells in
+the exchange picker cannot survive scrolling, tab switching, or currency names long enough to fill
+their cell. Reading the market instead of the screen sidesteps all three.
+
+The original project's history through v3.8.0 remains in this repository's git history.
 
 ## Acknowledgements
 
-This app builds on these open-source projects:
-
-- **[Velopack](https://github.com/velopack/velopack)** — installer & auto-update framework, © Caelan
-  Sayler / Velopack Ltd., [MIT License](https://github.com/velopack/velopack/blob/develop/LICENSE).
+- **[Velopack](https://github.com/velopack/velopack)** — installer & auto-update framework,
+  © Caelan Sayler / Velopack Ltd., [MIT License](https://github.com/velopack/velopack/blob/develop/LICENSE).
 - **[WPF UI](https://github.com/lepoco/wpfui)** (lepoco) — MIT License.
-- **[SharpHook](https://github.com/TolikPylypchuk/SharpHook)** — MIT License.
-- **[Vortice.Windows](https://github.com/amerkoleci/Vortice.Windows)** — MIT License.
 - **[Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json)** — MIT License.
-- Price data from **[poe.ninja](https://poe.ninja/poe2)** (unofficial API).
-
-## Support
-
-If this tool saves you some alt-tabbing, there's a **☕ Buy me a coffee** button right in the app.
-Thanks!
-
-## Disclaimer for those who seem to be troubled by it.. 
-Yes it was greatly helped by AI :D never the less it works and its free!
+- Market data from **[poe.ninja](https://poe.ninja/poe2)** (unofficial API). This project is not
+  affiliated with poe.ninja or Grinding Gear Games.
