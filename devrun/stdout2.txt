@@ -1,0 +1,91 @@
+[Debug] PoeAncientsPriceHelper starting
+[19:28:24.080] START prices=285 icons=True region={X=5,Y=30,Width=844,Height=1045}
+[overlay] region={X=5,Y=30,Width=844,Height=1045} screen={X=0,Y=0,Width=2560,Height=1440} bounds={X=0,Y=0,Width=2560,Height=1440} dpiForWindow=96
+[19:28:24.197] overlay ready
+[19:28:27.608] heartbeat cycle=12 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#342D1A brightness=41
+[19:28:31.346] heartbeat cycle=24 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#383424 brightness=48
+[19:28:35.081] heartbeat cycle=36 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3726 brightness=51
+[19:28:38.814] heartbeat cycle=48 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3A3625 brightness=49
+[19:28:42.535] heartbeat cycle=60 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3A3625 brightness=49
+[19:28:46.236] heartbeat cycle=72 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3928 brightness=52
+[19:28:49.982] heartbeat cycle=84 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#403C2B brightness=55
+[19:28:53.715] heartbeat cycle=96 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3725 brightness=50
+[19:28:57.439] heartbeat cycle=108 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3726 brightness=51
+[19:29:01.170] heartbeat cycle=120 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3826 brightness=51
+[19:29:04.879] heartbeat cycle=132 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3E3927 brightness=52
+[19:29:08.607] heartbeat cycle=144 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A27 brightness=53
+[19:29:12.303] heartbeat cycle=156 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A27 brightness=53
+[19:29:16.019] heartbeat cycle=168 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A27 brightness=53
+[19:29:19.752] heartbeat cycle=180 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A28 brightness=53
+[19:29:23.467] heartbeat cycle=192 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A28 brightness=53
+[19:29:27.201] heartbeat cycle=204 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3E3927 brightness=52
+[19:29:30.922] heartbeat cycle=216 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2C2719 brightness=36
+[19:29:34.628] heartbeat cycle=228 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#312C1D brightness=40
+[19:29:38.367] heartbeat cycle=240 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#393625 brightness=49
+[19:29:39.886] paused (game not foreground) — foreground hwnd=6751466 pid=25004 proc=firefox title='(8) Dota 2 WTF Moments 643 - YouTube — Mozilla Firefox'
+[19:29:43.632] resumed (game foreground)
+[19:29:45.824] heartbeat cycle=264 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3726 brightness=51
+[19:29:49.527] heartbeat cycle=276 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3726 brightness=51
+[19:29:53.253] heartbeat cycle=288 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3726 brightness=51
+[19:29:56.958] heartbeat cycle=300 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3726 brightness=51
+[19:30:00.685] heartbeat cycle=312 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3725 brightness=50
+[19:30:04.417] heartbeat cycle=324 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3725 brightness=50
+[19:30:08.115] heartbeat cycle=336 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3625 brightness=50
+[19:30:11.855] heartbeat cycle=348 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3A3625 brightness=49
+[19:30:15.594] heartbeat cycle=360 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3A3525 brightness=49
+[19:30:19.350] heartbeat cycle=372 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3625 brightness=50
+[19:30:23.067] heartbeat cycle=384 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3725 brightness=50
+[19:30:26.786] heartbeat cycle=396 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#373222 brightness=46
+[19:30:30.496] heartbeat cycle=408 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3726 brightness=51
+[19:30:34.220] heartbeat cycle=420 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3826 brightness=51
+[19:30:37.932] heartbeat cycle=432 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#2D2B24 brightness=41
+[19:30:38.532] paused (game not foreground) — foreground hwnd=6751466 pid=25004 proc=firefox title='(8) Dota 2 WTF Moments 643 - YouTube — Mozilla Firefox'
+[19:39:45.579] resumed (game foreground)
+[19:39:45.594] heartbeat cycle=2196 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#808585 brightness=131
+[19:39:45.901] panel OPEN brightness=131 avgPixel=#808585
+[19:39:46.175] OCR 21 rows → raw='YouTube' y=41 MISS | raw='dore - pc' y=168 MISS | raw='dore - p,' y=250 MISS | raw='+ 55 Damage' y=347 MISS | raw='Passive: Corruption' y=408 MISS | raw='Your attacks reduce the target's' y=464 MISS | raw='for 7 seconds.' y=496 MISS | raw='Poe Ancients Price Helpf' y=536 MISS | raw='eVlewN' y=537 MISS | raw='Passive: Soul Stealer' y=568 MISS | raw='League:' y=596 MISS | raw='2.ninja' y=621 MISS | raw='Desolator gains +2 d' y=627 MISS | raw='Region:' y=629 MISS | raw='enemy hero dies wh' y=659 MISS | raw='285 items loaded last fetcl' y=695 MISS | raw='Corruption, toa ma' y=695 MISS | raw='Ira Drop' y=703 MISS | raw='v3.8.O Credits' y=824 MISS | raw='Every Carry Item Explained' y=1000 MISS | raw='Dota 2 PowerPoints' y=1036 MISS
+[19:39:46.430] OCR 21 rows → raw='YouTube' y=41 MISS | raw='dore - pc' y=168 MISS | raw='dore - p,' y=250 MISS | raw='+ 55 Damage' y=347 MISS | raw='Passive: Corruption' y=408 MISS | raw='Your attacks reduce the target's' y=464 MISS | raw='for 7 seconds.' y=496 MISS | raw='Poe Ancients Price Helpf' y=536 MISS | raw='eVlewN' y=537 MISS | raw='Passive: Soul Stealer' y=568 MISS | raw='League:' y=596 MISS | raw='2.ninja' y=621 MISS | raw='Desolator gains +2 d' y=627 MISS | raw='Region:' y=629 MISS | raw='enemy hero dies wh' y=659 MISS | raw='285 items loaded last fetcl' y=695 MISS | raw='Corruption, toa ma' y=695 MISS | raw='Ira Drop' y=703 MISS | raw='v3.8.O Credits' y=824 MISS | raw='Every Carry Item Explained' y=1000 MISS | raw='Dota 2 PowerPoints' y=1036 MISS
+[19:39:46.710] OCR 21 rows → raw='YouTube' y=41 MISS | raw='dore - pc' y=168 MISS | raw='dore - p,' y=250 MISS | raw='+ 55 Damage' y=347 MISS | raw='Passive: Corruption' y=408 MISS | raw='Your attacks reduce the target's' y=464 MISS | raw='for 7 seconds.' y=496 MISS | raw='Poe Ancients Price Helpf' y=536 MISS | raw='eVlewN' y=537 MISS | raw='Passive: Soul Stealer' y=568 MISS | raw='League:' y=596 MISS | raw='2.ninja' y=621 MISS | raw='Desolator gains +2 d' y=627 MISS | raw='Region:' y=629 MISS | raw='enemy hero dies wh' y=659 MISS | raw='285 items loaded last fetcl' y=695 MISS | raw='Corruption, toa ma' y=695 MISS | raw='Ira Drop' y=703 MISS | raw='v3.8.O Credits' y=824 MISS | raw='Every Carry Item Explained' y=1000 MISS | raw='Dota 2 PowerPoints' y=1036 MISS
+[19:39:46.962] OCR 21 rows → raw='YouTube' y=41 MISS | raw='dore - pc' y=168 MISS | raw='dore - p,' y=250 MISS | raw='+ 55 Damage' y=347 MISS | raw='Passive: Corruption' y=408 MISS | raw='Your attacks reduce the target's' y=464 MISS | raw='for 7 seconds.' y=496 MISS | raw='Poe Ancients Price Helpf' y=536 MISS | raw='eVlewN' y=537 MISS | raw='Passive: Soul Stealer' y=568 MISS | raw='League:' y=596 MISS | raw='2.ninja' y=621 MISS | raw='Desolator gains +2 d' y=627 MISS | raw='Region:' y=629 MISS | raw='enemy hero dies wh' y=659 MISS | raw='285 items loaded last fetcl' y=695 MISS | raw='Corruption, toa ma' y=695 MISS | raw='Ira Drop' y=703 MISS | raw='v3.8.O Credits' y=824 MISS | raw='Every Carry Item Explained' y=1000 MISS | raw='Dota 2 PowerPoints' y=1036 MISS
+[19:39:47.219] OCR 21 rows → raw='YouTube' y=41 MISS | raw='dore - pc' y=168 MISS | raw='dore - p,' y=250 MISS | raw='+ 55 Damage' y=347 MISS | raw='Passive: Corruption' y=408 MISS | raw='Your attacks reduce the target's' y=464 MISS | raw='for 7 seconds.' y=496 MISS | raw='Poe Ancients Price Helpf' y=536 MISS | raw='eVlewN' y=537 MISS | raw='Passive: Soul Stealer' y=568 MISS | raw='League:' y=596 MISS | raw='2.ninja' y=621 MISS | raw='Desolator gains +2 d' y=627 MISS | raw='Region:' y=629 MISS | raw='enemy hero dies wh' y=659 MISS | raw='285 items loaded last fetcl' y=695 MISS | raw='Corruption, toa ma' y=695 MISS | raw='Ira Drop' y=703 MISS | raw='v3.8.O Credits' y=824 MISS | raw='Every Carry Item Explained' y=1000 MISS | raw='Dota 2 PowerPoints' y=1036 MISS
+[19:39:47.465] OCR 12 rows → raw='YouTube' y=41 MISS | raw='dore - pc' y=168 MISS | raw='dore - p,' y=250 MISS | raw='Poe Ancients Price Helper' y=408 MISS | raw='(8) Every Carry Item Explained -' y=408 MISS | raw='Poe Anoents Helper' y=437 MISS | raw='Runes of Akhr' y=476 MISS | raw='Calibrate Reg.on' y=524 MISS | raw='@ Settrgs' y=629 MISS | raw='This PC - File Explorer' y=700 MISS | raw='Home - File Explorer' y=700 MISS | raw='Dota 2 PowerPoints' y=1036 MISS
+[19:39:47.710] OCR 12 rows → raw='YouTube' y=41 MISS | raw='dore - pc' y=168 MISS | raw='dore - p,' y=250 MISS | raw='Poe Ancients Price Helper' y=408 MISS | raw='(8) Every Carry Item Explained -' y=408 MISS | raw='Poe Ancients Helper' y=437 MISS | raw='Runes of Akhr' y=476 MISS | raw='Calibrate Reg.on' y=524 MISS | raw='@ Settrgs' y=629 MISS | raw='This PC - File Explorer' y=700 MISS | raw='Home - File Explorer' y=700 MISS | raw='Dota 2 PowerPoints' y=1036 MISS
+[19:39:48.017] OCR 12 rows → raw='YouTube' y=41 MISS | raw='dore - pc' y=168 MISS | raw='dore - p,' y=250 MISS | raw='Poe Ancients Price Helper' y=408 MISS | raw='(8) Every Carry Item Explained -' y=408 MISS | raw='Poe Ancients Helper' y=437 MISS | raw='Runes of Akhr' y=476 MISS | raw='Calibrate Reg.on' y=524 MISS | raw='@ Settrgs' y=629 MISS | raw='This PC - File Explorer' y=700 MISS | raw='Home - File Explorer' y=700 MISS | raw='Dota 2 PowerPoints' y=1036 MISS
+[19:39:48.251] OCR 12 rows → raw='YouTube' y=41 MISS | raw='dore - pc' y=168 MISS | raw='dore - p,' y=250 MISS | raw='Poe Ancients Price Helper' y=408 MISS | raw='(8) Every Carry Item Explained -' y=408 MISS | raw='Poe Ancients Helper' y=437 MISS | raw='Runes of Akhr' y=476 MISS | raw='Calibrate Reg.on' y=524 MISS | raw='@ Settrgs' y=629 MISS | raw='This PC - File Explorer' y=700 MISS | raw='Home - File Explorer' y=700 MISS | raw='Dota 2 PowerPoints' y=1036 MISS
+[19:39:48.260] paused (game not foreground) — foreground hwnd=723666 pid=37700 proc=explorer title='Task Switching'
+[19:39:51.070] resumed (game foreground)
+[19:39:52.616] heartbeat cycle=2220 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3726 brightness=51
+[19:39:56.357] heartbeat cycle=2232 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3826 brightness=51
+[19:40:00.081] heartbeat cycle=2244 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3E3A27 brightness=53
+[19:40:03.160] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[19:40:10.336] resumed (game foreground)
+[19:40:11.282] heartbeat cycle=2280 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A28 brightness=53
+[19:40:15.003] heartbeat cycle=2292 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3725 brightness=50
+[19:40:17.483] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[19:41:13.262] resumed (game foreground)
+[19:41:14.813] heartbeat cycle=2484 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3A3625 brightness=49
+[19:41:18.226] paused (game not foreground) — foreground hwnd=2032618 pid=10184 proc=SnippingTool title='Snipping Tool Overlay'
+[19:41:18.543] resumed (game foreground)
+[19:41:18.559] heartbeat cycle=2496 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3625 brightness=50
+[19:41:20.690] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[19:42:12.131] resumed (game foreground)
+[19:42:14.608] heartbeat cycle=2676 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3C3726 brightness=51
+[19:42:15.835] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[19:42:27.382] resumed (game foreground)
+[19:42:29.558] heartbeat cycle=2724 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3B3625 brightness=50
+[19:42:31.713] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'
+[19:42:53.536] resumed (game foreground)
+[19:42:55.736] heartbeat cycle=2808 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#423E2A brightness=56
+[19:42:59.474] heartbeat cycle=2820 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#423D2A brightness=56
+[19:43:03.196] heartbeat cycle=2832 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#413C29 brightness=55
+[19:43:06.943] heartbeat cycle=2844 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#413C29 brightness=55
+[19:43:10.655] heartbeat cycle=2856 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#403B29 brightness=54
+[19:43:14.403] heartbeat cycle=2868 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3D3826 brightness=51
+[19:43:18.128] heartbeat cycle=2880 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3E3A28 brightness=53
+[19:43:21.875] heartbeat cycle=2892 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A28 brightness=53
+[19:43:25.589] heartbeat cycle=2904 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A28 brightness=53
+[19:43:29.310] heartbeat cycle=2916 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A28 brightness=53
+[19:43:33.051] heartbeat cycle=2928 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3A28 brightness=53
+[19:43:36.763] heartbeat cycle=2940 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3E3928 brightness=53
+[19:43:40.486] heartbeat cycle=2952 panelOpen=False confirmed=False region={X=5,Y=30,Width=844,Height=1045} rows=0 avgPixel=#3F3625 brightness=51
+[19:43:42.949] paused (game not foreground) — foreground hwnd=985500 pid=10092 proc=WindowsTerminal title='✳ Build currency exchange overlay without conflicts'

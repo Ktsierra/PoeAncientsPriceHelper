@@ -22,9 +22,15 @@ internal sealed class ExchangePickerStabilizer
     // closed or scrolled panel clears quickly.
     private const int MissesBeforeDrop = 3;
 
-    // A panel that jumps further than this is a different view (scrolled, reopened, resized), not
-    // jitter — start over rather than dragging stale cells onto it.
+    // A panel that jumps further than this is a different view (reopened, resized), not jitter —
+    // start over rather than dragging stale cells onto it. NOTE this catches the panel MOVING; it
+    // does not catch the list scrolling inside a stationary panel. See ScrollDetected.
     private const int PanelShiftResetPx = 24;
+
+    // How many remembered cells must agree on a vertical shift before it counts as a scroll. Two is
+    // enough to rule out a single mis-placed OCR box, and low enough to fire on the first scrolled
+    // pass — waiting longer would just let ghosts render.
+    private const int MinScrollVotes = 2;
 
     private sealed class Slot
     {
@@ -55,14 +61,34 @@ internal sealed class ExchangePickerStabilizer
         }
         _panel = panelBounds;
 
+        // The picker scrolls its CONTENT while the panel itself stays put, so PanelMoved above never
+        // fires on a scroll. Without this the retention above turns into ghosting: every cell that
+        // scrolled to a new Y opened a fresh slot while its old slot lived on for the miss budget,
+        // and a live session logged 28 cells read against 107 badges shown — the same currency drawn
+        // at three stale offsets, some of it landing mid-cell over the art. If the cells we remember
+        // are being read at a consistently different Y, the list moved under us and EVERY remembered
+        // position is stale, including the ones this pass happened to miss.
+        if (ScrollDetected(read)) _slots.Clear();
+
         foreach (var slot in _slots) slot.Misses++;
 
+        var refreshed = new HashSet<Slot>();
         foreach (var cell in read)
         {
             var slot = FindSlot(cell.Bounds);
-            if (slot is null) _slots.Add(new Slot { Cell = cell, Misses = 0 });
+            if (slot is null) { slot = new Slot { Cell = cell }; _slots.Add(slot); }
             else { slot.Cell = cell; slot.Misses = 0; }
+            refreshed.Add(slot);
         }
+
+        // A currency occupies exactly one cell of the grid, so the same key remembered at a DIFFERENT
+        // position is always a leftover — never a second real cell. Dropping it is what actually
+        // guarantees no duplicate badge survives, including a scroll too small or too partial for
+        // ScrollDetected to call. Cells genuinely missed this pass keep their badge: their key isn't
+        // in this read, so they fall through untouched and ride out the miss budget as before.
+        var readKeys = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var cell in read) readKeys.Add(cell.Key);
+        _slots.RemoveAll(s => !refreshed.Contains(s) && readKeys.Contains(s.Cell.Key));
 
         _slots.RemoveAll(s => s.Misses > MissesBeforeDrop);
 
@@ -73,6 +99,33 @@ internal sealed class ExchangePickerStabilizer
             : a.Bounds.Left.CompareTo(b.Bounds.Left));
         return result;
     }
+
+    // True when the remembered cells that reappear in this read have shifted vertically by a
+    // consistent amount — the signature of the list scrolling inside a stationary panel. Matched by
+    // KEY (not position, which is the thing that moved), and decided on the MEDIAN so one stray box
+    // can't outvote the grid. A scroll of less than the match tolerance is indistinguishable from
+    // jitter and is deliberately left to the duplicate drop instead.
+    private bool ScrollDetected(IReadOnlyList<ExchangeCell> read)
+    {
+        if (_slots.Count == 0 || read.Count == 0) return false;
+
+        var deltas = new List<int>();
+        foreach (var cell in read)
+        {
+            foreach (var slot in _slots)
+            {
+                if (!string.Equals(slot.Cell.Key, cell.Key, StringComparison.Ordinal)) continue;
+                deltas.Add(CenterY(cell.Bounds) - CenterY(slot.Cell.Bounds));
+                break;
+            }
+        }
+
+        if (deltas.Count < MinScrollVotes) return false;
+        deltas.Sort();
+        return Math.Abs(deltas[deltas.Count / 2]) > MatchTolerancePx;
+    }
+
+    private static int CenterY(Rectangle r) => r.Top + r.Height / 2;
 
     private bool PanelMoved(Rectangle panel) =>
         _panel != Rectangle.Empty &&

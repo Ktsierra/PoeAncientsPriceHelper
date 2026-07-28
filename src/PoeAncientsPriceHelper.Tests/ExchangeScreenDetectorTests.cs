@@ -75,6 +75,73 @@ public class ExchangeScreenDetectorTests
         Assert.NotNull(det.Main);
     }
 
+    // The live failure: the stylised title did not OCR at all, and requiring it sent every main-view
+    // frame down the picker branch, where "both side headers" failed the exactly-one test and came
+    // back None. A whole session never once classified MAIN, so the pair was never remembered.
+    [Fact]
+    public void Detect_MainView_SurvivesAMissingTitle()
+    {
+        var lines = MainViewLines();
+        lines.RemoveAt(0);   // title line absent entirely
+
+        var det = ExchangeScreenDetector.Detect(lines, Resolve);
+
+        Assert.NotNull(det.Main);
+        Assert.Null(det.Picker);
+        Assert.Equal("orb of chance", det.Main!.WantKey);
+        Assert.Equal("vaal orb", det.Main.HaveKey);
+    }
+
+    // Promoting on the two side headers must not lower the bar: without a corroborating "Market
+    // Ratio" / "Place Order" line, both headers alone still decide nothing.
+    [Fact]
+    public void Detect_BothHeadersWithoutTitleOrCorroboration_IsNone()
+    {
+        List<OcrTextLine> lines =
+        [
+            Line("I WANT", 660, 228, 80, 20),
+            Line("I HAVE", 1370, 228, 80, 20),
+            Line("Orb of Chance", 680, 275, 150, 24),
+        ];
+        Assert.True(ExchangeScreenDetector.Detect(lines, Resolve).IsNone);
+    }
+
+    // A wrapped name's badge must anchor to the LOWER line, not the union of both. Centring on the
+    // union puts the pill in the gap between the two lines — the "floating in the middle of the
+    // square" report — and the union also carries the tier numeral's left overhang.
+    [Fact]
+    public void Detect_Picker_WrappedCellAnchorsToItsLowerLine()
+    {
+        List<OcrTextLine> lines =
+        [
+            Line("I WANT", 660, 100, 80, 20),
+            Line("Exalted Orb", 345, 160, 130, 22),
+            Line("Chaos Orb", 645, 160, 110, 22),
+            Line("Orb of", 940, 160, 70, 22),
+            Line("Augmentation", 930, 184, 140, 22),
+        ];
+
+        var det = ExchangeScreenDetector.Detect(lines, Resolve);
+
+        Assert.NotNull(det.Picker);
+        var wrapped = det.Picker!.Cells.Single(c => c.Key == "orb of augmentation");
+        // Bounds span both lines; the anchor is just the lower one.
+        Assert.Equal(160, wrapped.Bounds.Top);
+        Assert.Equal(206, wrapped.Bounds.Bottom);
+        Assert.Equal(184, wrapped.AnchorBounds.Top);
+        Assert.Equal(22, wrapped.AnchorBounds.Height);
+    }
+
+    // Single-line cells have no separate anchor — Bounds is already the line.
+    [Fact]
+    public void Detect_Picker_SingleLineCellAnchorsToItself()
+    {
+        var det = ExchangeScreenDetector.Detect(PickerLines(), Resolve);
+        Assert.NotNull(det.Picker);
+        foreach (var cell in det.Picker!.Cells.Where(c => c.Anchor is null))
+            Assert.Equal(cell.Bounds, cell.AnchorBounds);
+    }
+
     // Title alone is not enough — a corroborating signature is required (multi-signature confirm).
     [Fact]
     public void Detect_TitleWithoutCorroboration_IsNone()

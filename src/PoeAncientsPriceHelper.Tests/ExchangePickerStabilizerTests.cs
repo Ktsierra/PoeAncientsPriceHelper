@@ -99,6 +99,73 @@ public class ExchangePickerStabilizerTests
         Assert.Single(shown);
     }
 
+    // Scrolling the picker moves the CELLS while the panel stays put, so the panel-shift reset never
+    // fires. In a live session that produced 28 cells read against 107 badges shown — the same
+    // currencies re-badged at every stale offset they had passed through.
+    [Fact]
+    public void ScrollingDoesNotDuplicateBadges()
+    {
+        var s = new ExchangePickerStabilizer();
+        s.Stabilize(ExchangeSide.Want, Panel, FullRead());
+
+        var scrolled = FullRead().Select(c => c with { Bounds = c.Bounds with { Y = c.Bounds.Y - 60 } }).ToList();
+        var shown = s.Stabilize(ExchangeSide.Want, Panel, scrolled);
+
+        Assert.Equal(3, shown.Count);
+        Assert.All(shown, c => Assert.Equal(65, c.Bounds.Y));
+    }
+
+    // The ghosts that mattered most were cells the scrolled pass did NOT re-read: nothing refreshed
+    // them, so the miss budget kept drawing them at a position the grid had already left.
+    [Fact]
+    public void ScrollDropsGhostsThatWereNotReRead()
+    {
+        var s = new ExchangePickerStabilizer();
+        s.Stabilize(ExchangeSide.Want, Panel, FullRead());
+
+        // Two of the three reappear 60px higher; "divine orb" scrolled out of the read entirely.
+        var scrolled = new List<ExchangeCell> { C("exalted orb", 345, 65), C("chaos orb", 645, 65) };
+        var shown = s.Stabilize(ExchangeSide.Want, Panel, scrolled);
+
+        Assert.Equal(2, shown.Count);
+        Assert.DoesNotContain(shown, c => c.Key == "divine orb");
+    }
+
+    // A key read at a new position is the same grid cell that moved, never a second one — even when
+    // the shift is too small or too partial to be called a scroll.
+    [Fact]
+    public void SameKeyAtANewPositionReplacesTheOldSlot()
+    {
+        var s = new ExchangePickerStabilizer();
+        s.Stabilize(ExchangeSide.Want, Panel, FullRead());
+
+        // Only Exalted moves, and far enough to open a new slot; the others hold station, so the
+        // median vote says "no scroll" and the duplicate drop is what has to catch this.
+        var read = new List<ExchangeCell>
+        {
+            C("exalted orb", 345, 190), C("chaos orb", 645, 125), C("divine orb", 940, 125),
+        };
+        var shown = s.Stabilize(ExchangeSide.Want, Panel, read);
+
+        Assert.Equal(3, shown.Count);
+        Assert.Equal(190, shown.Single(c => c.Key == "exalted orb").Bounds.Y);
+    }
+
+    // The anti-blink guarantee must survive the duplicate drop: a cell absent from the read is not a
+    // stale duplicate, so it still rides out its miss budget.
+    [Fact]
+    public void ScrollFixDoesNotBreakMissRetention()
+    {
+        var s = new ExchangePickerStabilizer();
+        s.Stabilize(ExchangeSide.Want, Panel, FullRead());
+
+        var clipped = new List<ExchangeCell> { C("chaos orb", 645, 125), C("divine orb", 940, 125) };
+        var shown = s.Stabilize(ExchangeSide.Want, Panel, clipped);
+
+        Assert.Equal(3, shown.Count);
+        Assert.Contains(shown, c => c.Key == "exalted orb");
+    }
+
     [Fact]
     public void ResetClearsEverything()
     {

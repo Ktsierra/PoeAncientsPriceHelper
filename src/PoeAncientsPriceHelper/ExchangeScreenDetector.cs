@@ -5,15 +5,29 @@ namespace PoeAncientsPriceHelper;
 internal enum ExchangeSide { Want, Have }
 
 // One resolved picker grid cell: the exchange price key and the OCR'd name-text bounds (absolute
-// screen coords) the overlay anchors its badge to.
-internal sealed record ExchangeCell(string Key, Rectangle Bounds);
+// screen coords). Anchor is the single line the badge should sit beside — for a wrapped two-line
+// name that is the LOWER fragment, not the union of both: a pill centred on the union lands in the
+// gap between the two lines, which reads as "floating in the middle of the square". Null means the
+// cell is a single line and Bounds is already the anchor.
+internal sealed record ExchangeCell(string Key, Rectangle Bounds, Rectangle? Anchor = null)
+{
+    public Rectangle AnchorBounds => Anchor ?? Bounds;
+}
 
 // The regular exchange view: the currently selected pair read off the slot labels (null = that side
 // is empty) and where the "Market Ratio" header sits (badge anchor).
 internal sealed record ExchangeMainView(string? WantKey, string? HaveKey, Rectangle? MarketRatioBounds);
 
 // A currency-selection picker: which side it is for, every resolved cell, and the panel bounds.
-internal sealed record ExchangePickerView(ExchangeSide Side, IReadOnlyList<ExchangeCell> Cells, Rectangle PanelBounds);
+// Unresolved carries the OCR texts under the header that matched no price key even after the
+// wrapped-name merge — purely diagnostic, and the only way to see WHICH items the picker dropped.
+// A live round showed cells topping out at ~35 with items visibly missing, and the log could not
+// name one of them: it records what resolved, and a name that never resolved leaves no trace at all.
+internal sealed record ExchangePickerView(
+    ExchangeSide Side,
+    IReadOnlyList<ExchangeCell> Cells,
+    Rectangle PanelBounds,
+    IReadOnlyList<string>? Unresolved = null);
 
 // At most one of Main/Picker is non-null. None = this frame is not the currency exchange.
 internal sealed record ExchangeDetection(ExchangeMainView? Main, ExchangePickerView? Picker)
@@ -54,9 +68,19 @@ internal static class ExchangeScreenDetector
         if (title is not null)
             return DetectMain(lines, wantLabels, haveLabels, resolve);
 
-        // Picker: exactly ONE side's big header on screen and no main title. Both (a main view whose
-        // title failed OCR) or neither → not confidently anything → None.
-        if (wantLabels.Count > 0 == haveLabels.Count > 0) return ExchangeDetection.None;
+        // BOTH side headers and no title: structurally the main view. The title used to be required
+        // here, and in a live session that cost us the main view entirely — the stylised "Currency
+        // Exchange" heading never OCR'd, so every main-view frame fell through to the picker branch,
+        // failed its "exactly one header" test and was classified None. The pair was therefore never
+        // remembered and picker badges only worked from a manually-set base. Promoting on the two
+        // side headers alone is safe because DetectMain still demands a corroborating "Market Ratio"
+        // / "Place Order" line before it returns anything.
+        if (wantLabels.Count > 0 && haveLabels.Count > 0)
+            return DetectMain(lines, wantLabels, haveLabels, resolve);
+
+        // Picker: exactly ONE side's big header on screen and no main title. Neither → not
+        // confidently anything → None.
+        if (wantLabels.Count == 0 && haveLabels.Count == 0) return ExchangeDetection.None;
         var side = wantLabels.Count > 0 ? ExchangeSide.Want : ExchangeSide.Have;
         var header = (wantLabels.Count > 0 ? wantLabels : haveLabels).OrderBy(l => l.Bounds.Top).First();
         return DetectPicker(lines, side, header, resolve);
@@ -129,7 +153,9 @@ internal static class ExchangeScreenDetector
                 if (unresolved[j] is not { } b) continue;
                 if (!AreWrappedPair(a.Bounds, b.Bounds)) continue;
                 if (resolve(a.Text + " " + b.Text) is not { } key) continue;
-                cells.Add(new ExchangeCell(key, Rectangle.Union(a.Bounds, b.Bounds)));
+                // Union for the cell's extent (column matching), but anchor the badge to the LOWER
+                // line — a is above b by AreWrappedPair's contract.
+                cells.Add(new ExchangeCell(key, Rectangle.Union(a.Bounds, b.Bounds), b.Bounds));
                 unresolved[i] = null;
                 unresolved[j] = null;
                 break;
@@ -144,7 +170,14 @@ internal static class ExchangeScreenDetector
             ? x.Bounds.Top.CompareTo(y.Bounds.Top)
             : x.Bounds.Left.CompareTo(y.Bounds.Left));
         var panel = Union(cells.Select(c => c.Bounds).Append(header.Bounds));
-        return new ExchangeDetection(null, new ExchangePickerView(side, cells, panel));
+
+        // What survived unmatched. Tab labels, section headers and stack counts land here too, so
+        // this is noise plus the real misses — but the real misses are only visible here.
+        var leftovers = new List<string>();
+        foreach (var line in unresolved)
+            if (line is { } l) leftovers.Add(l.Text);
+
+        return new ExchangeDetection(null, new ExchangePickerView(side, cells, panel, leftovers));
     }
 
     // b sits directly beneath a (small gap, tiny tolerance for OCR box overlap) with ≥50% horizontal

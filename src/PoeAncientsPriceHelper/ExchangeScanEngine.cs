@@ -184,6 +184,12 @@ internal sealed class ExchangeScanEngine : IDisposable
                             (det.Main is { } m ? $"MAIN want={m.WantKey ?? "-"} have={m.HaveKey ?? "-"}"
                              : det.Picker is { } p ? $"PICKER side={p.Side} cells={p.Cells.Count}"
                              : "NONE"));
+                        // Name the picker text that matched no price key, so a missing badge can be
+                        // traced to the OCR string that caused it instead of just not appearing.
+                        if (det.Picker is { Unresolved: { Count: > 0 } leftovers })
+                            ExchangeDiag.Log($"  unresolved ({leftovers.Count}): " +
+                                string.Join(" | ", leftovers.Take(40)));
+
                         if (det.IsNone && lines.Count > 0)
                             ExchangeDiag.Quiet($"detect NONE with {lines.Count} OCR lines — either no " +
                                 "'i want'/'i have' header resolved, or fewer than 3 currency cells matched " +
@@ -318,10 +324,13 @@ internal sealed class ExchangeScanEngine : IDisposable
                     $"maxVolRate={entry.MaxVolumeRate?.ToString() ?? "-"})");
                 continue;
             }
-            ExchangeDiag.Log($"  cell '{cell.Key}' -> {ratio}");
+            // Bounds included because every badge-placement bug so far has been a geometry question
+            // that could not be answered from the log — only guessed at from a scaled screenshot.
+            ExchangeDiag.Log($"  cell '{cell.Key}' -> {ratio} " +
+                $"@ L={cell.Bounds.Left} R={cell.Bounds.Right} T={cell.Bounds.Top} H={cell.Bounds.Height}");
             badges.Add(new ExchangeBadge(ratio,
                 ExchangeRates.FormatVolume(entry.VolumePrimaryValue, snapshot.PrimaryCurrency),
-                cell.Bounds));
+                cell.Bounds, cell.Anchor));
         }
         if (badges.Count == 0)
         {
@@ -332,8 +341,14 @@ internal sealed class ExchangeScanEngine : IDisposable
         }
 
         var (ageText, level) = Staleness(repo);
+        // The columns the overlay will derive from exactly these bounds, so the log shows where each
+        // pill is actually going to be right-aligned without having to read it off the screen.
+        var cellRects = new List<Rectangle>(badges.Count);
+        foreach (var b in badges) cellRects.Add(b.CellBounds);
+        var cols = ExchangeBadgeLayout.Columns(cellRects, picker.PanelBounds);
         ExchangeDiag.Log($"SHOW picker side={picker.Side} base='{baseKey}' badges={badges.Count} " +
-            $"panel={picker.PanelBounds} age={ageText}");
+            $"panel={picker.PanelBounds} age={ageText} " +
+            $"columns=[{string.Join(", ", cols.Lefts.Select((l, i) => $"{l}->{cols.Rights[i]}"))}]");
         ExchangeDiag.ClearQuiet();
         ExchangeOverlayManager.ShowPicker(badges, picker.PanelBounds, ageText, level);
         IsShowing = true;
