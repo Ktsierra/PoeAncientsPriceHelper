@@ -486,6 +486,86 @@ Superseded, kept in-tree until Mac reviews rather than deleted unilaterally:
 
 ---
 
+## 2026-07-28 — post-mortem from the real in-game logs
+
+The `devrun/` logs committed in `74a396d` are ~14,200 lines of `ExchangeDiag`
+output from two live sessions at 2560x1440. This is the evidence the earlier
+decision was made on impressions alone, so it is worth recording what it
+actually shows — including where it contradicts what we assumed.
+
+### What worked better than expected
+
+| Signal | Count |
+|---|---|
+| Picker detected | 358 |
+| Badges shown | 332 |
+| Detection returned NONE | 62 |
+| Cells resolved per pass | typically 28-38 |
+| **Exceptions** | **0** |
+
+Picker detection and cell resolution were **not** the problem — they worked most
+of the time, at a real resolution, on a real client. **W-4 did not reproduce
+in-game at all**: zero exceptions across 422 scan passes, so the
+`ArgumentNullException('encoder')` really was tied to the price engine starting
+concurrently, which never happens under `--debug`.
+
+### What actually broke it
+
+**1. The stabilizer I added was the ghost generator.** This is the clearest
+finding in the logs and it is my bug, not a design flaw of OCR:
+
+```
+stabilizer: 34 read -> 65 shown
+stabilizer: 31 read -> 93 shown
+stabilizer: 35 read -> 114 shown   <- 79 stale badges on screen at once
+```
+
+Scrolling moves every cell, so position-keyed matching sees them all as *new*
+while keeping the old ones alive for 3 passes. They accumulate. At worst the
+overlay drew **114 badges over a panel containing 35 cells**. The panel-moved
+reset never fired because scrolling inside the panel does not move the panel.
+
+Fixable in principle (reset on a detected scroll, key cells by resolved name
+rather than position), but see below — it would not have saved the approach.
+
+**2. Latency, measured.** 422 scan passes:
+
+| | ms |
+|---|---|
+| median gap | 936 |
+| p90 | 1,066 |
+| max | 9,628 |
+
+A ~1s median with a 9.6s worst case, against a list the player scrolls in a
+fraction of a second. The overlay is always describing a stale screen. This is
+the structural one, and it is why fixing the stabilizer would not have been
+enough.
+
+**3. Main-view detection essentially never worked.** Across both sessions the
+main exchange view was detected **twice**, and neither read a complete pair:
+
+```
+scan area={0,0,2560,1440} ocrLines=34 -> MAIN want=- have=-
+scan area={0,0,2560,1440} ocrLines=31 -> MAIN want=- have=chaos orb
+```
+
+So `ExchangePairState` — the whole remembered want/have mechanism — never had
+anything to remember in practice. The manual base wasn't a fallback for odd
+setups, it was the only thing that ever worked. Only 3 `no ratio base` hides
+appear in the logs, all before the manual base was set.
+
+**4. The gate is noisy but harmless.** 29 hits against 194 misses; the misses
+are just the loop idling off-exchange, which is what it is supposed to do.
+
+### Conclusion
+
+The decision to abandon stands, but the reasoning is sharper than before: the
+fatal problems were **latency** and **no room to draw in dense cells**, both
+structural. Detection was fine. Ghosting was my own regression and was fixable.
+Nothing here suggests the per-cell approach was one fix away from working.
+
+---
+
 ## Might do — configurable exchange scan region
 
 Raised by the tester: *"would it be better if we did the same thing remnants do
