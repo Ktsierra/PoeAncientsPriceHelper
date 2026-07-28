@@ -17,9 +17,13 @@
     <Product>Poe Currency Helper</Product>
     <Description>Live poe.ninja currency-exchange ratios for Path of Exile 2, in a companion panel beside the game.</Description>
     <Version>1.0.0</Version>
-    <Authors>pedro</Authors>
-    <Company>pedro</Company>
-    <Copyright>Copyright (c) 2026 pedro</Copyright>
+    <!-- Derived work: Ktsierra maintains this app, pedro wrote the project it was forked from and
+         still holds copyright in the parts that carried over (the poe.ninja layer, the ratio maths,
+         Happy Eyeballs, the Velopack plumbing). See NOTICE.md, including the unresolved licence
+         question — neither repository carries a LICENCE file. -->
+    <Authors>Ktsierra</Authors>
+    <Company>Ktsierra</Company>
+    <Copyright>Copyright (c) 2026 Ktsierra. Portions copyright (c) 2026 pedro (Poe Ancients Price Helper).</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

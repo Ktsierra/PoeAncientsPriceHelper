@@ -122,7 +122,12 @@ That approach was tried here first and abandoned for good reason — anchoring p
 the exchange picker cannot survive scrolling, tab switching, or currency names long enough to fill
 their cell. Reading the market instead of the screen sidesteps all three.
 
-The original project's history through v3.8.0 remains in this repository's git history.
+The original project's history through v3.8.0 remains in this repository's git history. Full
+attribution — including which files carried over — is in [NOTICE.md](NOTICE.md).
+
+> **Licence status is unresolved.** Neither this repository nor the project it was forked from
+> carries a LICENCE file, which under default copyright means no permission to redistribute. See
+> [NOTICE.md](NOTICE.md) for what would resolve it. Until then, please don't redistribute builds.
 
 ## Acknowledgements
 
